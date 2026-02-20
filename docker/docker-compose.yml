@@ -1,0 +1,49 @@
+services:
+  oracle:
+    image: container-registry.oracle.com/database/free:latest
+    container_name: fittrack-oracle
+    ports:
+      - "1521:1521"
+    environment:
+      - ORACLE_PWD=${ORACLE_SYS_PASSWORD:-Oracle_Sys_2026!}
+      - ORACLE_CHARACTERSET=AL32UTF8
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ./init-db:/opt/oracle/scripts/startup
+    healthcheck:
+      test: [ "CMD-SHELL", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s system/$${ORACLE_PWD}@localhost:1521/FREEPDB1 | grep -q '1'" ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+
+  redis:
+    image: redis:7-alpine
+    container_name: fittrack-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: fittrack-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    environment:
+      - ORACLE_DSN=fittrack-oracle:1521/FREEPDB1
+      - REDIS_URL=redis://fittrack-redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  oracle-data:

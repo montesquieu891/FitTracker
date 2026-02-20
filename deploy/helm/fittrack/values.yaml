@@ -1,0 +1,116 @@
+# Default values for FitTrack Helm chart
+
+replicaCount: 2
+
+image:
+  repository: oci.example.com/fittrack/api
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: api.fittrack.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: fittrack-tls
+      hosts:
+        - api.fittrack.example.com
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+env:
+  APP_ENV: production
+  LOG_FORMAT: json
+  LOG_LEVEL: INFO
+  ORACLE_POOL_MIN: "4"
+  ORACLE_POOL_MAX: "20"
+  CORS_ORIGINS: "https://fittrack.example.com"
+  RATE_LIMIT_ANONYMOUS: "10"
+  RATE_LIMIT_USER: "100"
+  RATE_LIMIT_ADMIN: "500"
+
+secrets:
+  # Reference to Kubernetes Secret containing sensitive values
+  existingSecret: fittrack-secrets
+  # Keys expected in the secret:
+  #   ORACLE_DSN, ORACLE_USER, ORACLE_PASSWORD
+  #   REDIS_URL
+  #   JWT_PRIVATE_KEY, JWT_PUBLIC_KEY
+  #   SECRET_KEY
+  #   GOOGLE_FIT_CLIENT_ID, GOOGLE_FIT_CLIENT_SECRET
+  #   FITBIT_CLIENT_ID, FITBIT_CLIENT_SECRET
+
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: 8000
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Redis sidecar (or external)
+redis:
+  enabled: false
+  # If disabled, set REDIS_URL in secrets

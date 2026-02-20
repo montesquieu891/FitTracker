@@ -1,0 +1,12 @@
+apiVersion: v2
+name: fittrack
+description: FitTrack gamified fitness platform
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - fitness
+  - gamification
+  - sweepstakes
+maintainers:
+  - name: FitTrack Team

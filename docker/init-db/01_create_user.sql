@@ -1,0 +1,21 @@
+-- Create the fittrack application user
+-- This runs on first container startup only
+
+ALTER SESSION SET CONTAINER = FREEPDB1;
+
+CREATE USER fittrack IDENTIFIED BY "FitTrack_Dev_2026!"
+    DEFAULT TABLESPACE users
+    TEMPORARY TABLESPACE temp
+    QUOTA UNLIMITED ON users;
+
+GRANT CONNECT, RESOURCE TO fittrack;
+GRANT CREATE SESSION TO fittrack;
+GRANT CREATE TABLE TO fittrack;
+GRANT CREATE VIEW TO fittrack;
+GRANT CREATE SEQUENCE TO fittrack;
+GRANT CREATE PROCEDURE TO fittrack;
+
+-- For JSON Duality Views
+GRANT CREATE JSON RELATIONAL DUALITY VIEW TO fittrack;
+
+EXIT;

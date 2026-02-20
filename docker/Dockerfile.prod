@@ -1,0 +1,53 @@
+# ── Stage 1: Builder ────────────────────────────────────────────────
+FROM python:3.12-slim AS builder
+
+WORKDIR /build
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project metadata for dependency resolution
+COPY pyproject.toml .
+COPY src/ src/
+
+# Build wheel and install into /install prefix
+RUN pip install --no-cache-dir --prefix=/install .
+
+
+# ── Stage 2: Runtime ───────────────────────────────────────────────
+FROM python:3.12-slim AS runtime
+
+# Security: non-root user
+RUN groupadd -r fittrack && useradd -r -g fittrack -d /app -s /sbin/nologin fittrack
+
+WORKDIR /app
+
+# Copy installed packages from builder
+COPY --from=builder /install /usr/local
+
+# Copy application source
+COPY src/ src/
+COPY scripts/ scripts/
+COPY static/ static/
+
+# Don't copy keys/ directory — mount at runtime or use env vars
+
+# Set environment
+ENV PYTHONPATH=/app/src:/app \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    APP_ENV=production \
+    LOG_FORMAT=json \
+    LOG_LEVEL=INFO
+
+# Switch to non-root user
+USER fittrack
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live')" || exit 1
+
+CMD ["uvicorn", "fittrack.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

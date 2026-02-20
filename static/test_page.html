@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTrack API Tester</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 24px;
+        }
+
+        h1 {
+            color: #38bdf8;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            max-width: 1200px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #334155;
+        }
+
+        .card h2 {
+            color: #38bdf8;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 4px;
+            margin-top: 8px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 14px;
+            font-family: monospace;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .btn-get {
+            background: #22c55e;
+            color: #fff;
+        }
+
+        .btn-post {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        .btn-patch {
+            background: #f59e0b;
+            color: #000;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        #response {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+            max-width: 1200px;
+        }
+
+        #response h3 {
+            color: #38bdf8;
+            margin-bottom: 8px;
+        }
+
+        #status {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .status-ok {
+            color: #22c55e;
+        }
+
+        .status-err {
+            color: #ef4444;
+        }
+
+        pre {
+            background: #1e293b;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        table tr:hover td {
+            background: #334155;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🏋️ FitTrack API Tester</h1>
+    <p class="subtitle">Dev-only tool for testing API endpoints. Base URL: <span
+            id="baseUrl">http://localhost:8000</span></p>
+
+    <!-- Auth Card -->
+    <div class="card" style="max-width:1200px;margin-bottom:16px;border-color:#f59e0b;">
+        <h2 style="color:#f59e0b;">🔐 Authentication</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+            <div>
+                <label>Email</label>
+                <input id="authEmail" value="test@example.com" />
+                <label>Password</label>
+                <input id="authPassword" type="password" value="Test1234!" />
+            </div>
+            <div>
+                <label>Register — Date of Birth</label>
+                <input id="authDob" value="1990-05-15" placeholder="YYYY-MM-DD" />
+                <label>Register — State</label>
+                <input id="authState" value="CA" placeholder="2-letter state code" maxlength="2" />
+            </div>
+            <div>
+                <label>Token Status</label>
+                <div id="authStatus"
+                    style="padding:8px;border-radius:6px;background:#0f172a;font-size:12px;font-family:monospace;min-height:36px;color:#ef4444;">
+                    Not logged in
+                </div>
+                <label>Role</label>
+                <div id="authRole"
+                    style="padding:8px;border-radius:6px;background:#0f172a;font-size:13px;color:#94a3b8;">—</div>
+            </div>
+        </div>
+        <div class="btn-row">
+            <button class="btn-post" onclick="authRegister()">Register</button>
+            <button class="btn-get" onclick="authLogin()">Login</button>
+            <button class="btn-patch" onclick="authRefresh()">Refresh Token</button>
+            <button class="btn-get" onclick="authMe()">Who Am I (/me)</button>
+            <button class="btn-delete" onclick="authLogout()">Logout</button>
+            <button style="background:#475569;color:#e2e8f0;" onclick="authClear()">Clear Token</button>
+        </div>
+    </div>
+
+    <!-- Database Controls -->
+    <div class="card" style="max-width:1200px;margin-bottom:16px;">
+        <h2>Database Controls</h2>
+        <div class="btn-row">
+            <button class="btn-get" onclick="apiCall('GET', '/health')">Health Check</button>
+            <button class="btn-post" onclick="apiCall('POST', '/api/v1/dev/seed')">Seed Database</button>
+            <button class="btn-delete"
+                onclick="if(confirm('Reset all data?')) apiCall('POST', '/api/v1/dev/reset')">Reset Database</button>
+            <button class="btn-patch" onclick="loadReport()">Load Reports</button>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- Users Card -->
+        <div class="card">
+            <h2>Users</h2>
+            <label>User ID</label>
+            <input id="userId" placeholder="user UUID" />
+            <label>Create User JSON</label>
+            <textarea id="userBody">{"email": "test@example.com", "password_hash": "hashed_pw_123"}</textarea>
+            <div class="btn-row">
+                <button class="btn-get" onclick="apiCall('GET', '/api/v1/users')">List</button>
+                <button class="btn-get" onclick="apiCall('GET', '/api/v1/users/' + g('userId'))">Get</button>
+                <button class="btn-post" onclick="apiCall('POST', '/api/v1/users', g('userBody'))">Create</button>
+                <button class="btn-patch"
+                    onclick="apiCall('PATCH', '/api/v1/users/' + g('userId'), g('userBody'))">Update</button>
+                <button class="btn-delete" onclick="apiCall('DELETE', '/api/v1/users/' + g('userId'))">Delete</button>
+            </div>
+        </div>
+
+        <!-- Profiles Card -->
+        <div class="card">
+            <h2>Profiles</h2>
+            <label>Profile ID</label>
+            <input id="profileId" placeholder="profile UUID" />
+            <label>Create Profile JSON</label>
+            <textarea
+                id="profileBody">{"user_id": "", "display_name": "Jane Doe", "date_of_birth": "1990-05-15", "state_of_residence": "CA", "biological_sex": "female", "age_bracket": "30-39", "fitness_level": "intermediate"}</textarea>
+            <div class="btn-row">
+                <button class="btn-get" onclick="apiCall('GET', '/api/v1/profiles')">List</button>
+                <button class="btn-get" onclick="apiCall('GET', '/api/v1/profiles/' + g('profileId'))">Get</button>
+                <button class="btn-post" onclick="apiCall('POST', '/api/v1/profiles', g('profileBody'))">Create</button>
+                <button class="btn-patch"
+                    onclick="apiCall('PUT', '/api/v1/profiles/' + g('profileId'), g('profileBody'))">Update</button>
+            </div>
+        </div>
+
+        <!-- Connections Card -->
+        <div class="card">
+            <h2>Tracker Connections</h2>
+            <label>Connection ID</label>
+            <input id="connectionId" placeholder="connection UUID" />
+            <label>Create Connection JSON</label>
+            <textarea id="connectionBody">{"user_id": "", "provider": "google_fit"}</textarea>
+            <div class="btn-row">
+                <button class="btn-get" onclick="apiCall('GET', '/api/v1/connections')">List</button>
+                <button class="btn-post"
+                    onclick="apiCall('POST', '/api/v1/connections', g('connectionBody'))">Create</button>
+                <button class="btn-delete"
+                    onclick="apiCall('DELETE', '/api/v1/connections/' + g('connectionId'))">Delete</button>
+            </div>
+        </div>
+
+        <!-- Activities Card -->
+        <div class="card">
+            <h2>Activities</h2>
+            <label>Filter by User ID</label>
+            <input id="activityUserId" placeholder="user UUID (optional)" />
+            <label>Create Activity JSON</label>
+            <textarea
+                id="activityBody">{"user_id": "", "activity_type": "steps", "start_time": "2026-01-15T08:00:00", "metrics": {"step_count": 5000}}</textarea>
+            <div class="btn-row">
+                <button class="btn-get"
+                    onclick="apiCall('GET', '/api/v1/activities' + (g('activityUserId') ? '?user_id=' + g('activityUserId') : ''))">List</button>
+                <button class="btn-post"
+                    onclick="apiCall('POST', '/api/v1/activities', g('activityBody'))">Create</button>
+            </div>
+        </div>
+
+        <!-- Transactions Card -->
+        <div class="card">
+            <h2>Point Transactions</h2>
+            <label>Filter by User ID</label>
+            <input id="txnUserId" placeholder="user UUID (optional)" />
+            <label>Create Transaction JSON</label>
+            <textarea
+                id="txnBody">{"user_id": "", "transaction_type": "earn", "amount": 100, "balance_after": 500, "description": "Step bonus"}</textarea>
+            <div class="btn-row">
+                <button class="btn-get"
+                    onclick="apiCall('GET', '/api/v1/transactions' + (g('txnUserId') ? '?user_id=' + g('txnUserId') : ''))">List</button>
+                <button class="btn-post" onclick="apiCall('POST', '/api/v1/transactions', g('txnBody'))">Create</button>
+            </div>
+        </div>
+
+        <!-- Sponsors Card -->
+        <div class="card">
+            <h2>Sponsors</h2>
+            <label>Sponsor ID</label>
+            <input id="sponsorId" placeholder="sponsor UUID" />
+            <label>Create Sponsor JSON</label>
+            <textarea id="sponsorBody">{"name": "Test Sponsor", "contact_email": "partner@test.com"}</textarea>
+            <div class="btn-row">
+                <button class="btn-get" onclick="apiCall('GET', '/api/v1/sponsors')">List</button>
+                <button class="btn-get" onclick="apiCall('GET', '/api/v1/sponsors/' + g('sponsorId'))">Get</button>
+                <button class="btn-post" onclick="apiCall('POST', '/api/v1/sponsors', g('sponsorBody'))">Create</button>
+                <button class="btn-delete"
+                    onclick="apiCall('DELETE', '/api/v1/sponsors/' + g('sponsorId'))">Delete</button>
+            </div>
+        </div>
+
+        <!-- Drawings Card -->
+        <div class="card">
+            <h2>Drawings</h2>
+            <label>Drawing ID</label>
+            <input id="drawingId" placeholder="drawing UUID" />
+            <label>Create Drawing JSON</label>
+            <textarea
+                id="drawingBody">{"drawing_type": "daily", "name": "Daily Draw", "ticket_cost_points": 100, "drawing_time": "2026-01-15T21:00:00", "ticket_sales_close": "2026-01-15T20:55:00"}</textarea>
+            <div class="btn-row">
+                <button class="btn-get" onclick="apiCall('GET', '/api/v1/drawings')">List</button>
+                <button class="btn-get" onclick="apiCall('GET', '/api/v1/drawings/' + g('drawingId'))">Get</button>
+                <button class="btn-post" onclick="apiCall('POST', '/api/v1/drawings', g('drawingBody'))">Create</button>
+                <button class="btn-delete"
+                    onclick="apiCall('DELETE', '/api/v1/drawings/' + g('drawingId'))">Delete</button>
+            </div>
+        </div>
+
+        <!-- Tickets Card -->
+        <div class="card">
+            <h2>Tickets</h2>
+            <label>Filter by Drawing ID</label>
+            <input id="ticketDrawingId" placeholder="drawing UUID (optional)" />
+            <label>Create Ticket JSON</label>
+            <textarea id="ticketBody">{"drawing_id": "", "user_id": ""}</textarea>
+            <div class="btn-row">
+                <button class="btn-get"
+                    onclick="apiCall('GET', '/api/v1/tickets' + (g('ticketDrawingId') ? '?drawing_id=' + g('ticketDrawingId') : ''))">List</button>
+                <button class="btn-post" onclick="apiCall('POST', '/api/v1/tickets', g('ticketBody'))">Create</button>
+            </div>
+        </div>
+
+        <!-- Prizes Card -->
+        <div class="card">
+            <h2>Prizes</h2>
+            <label>Filter by Drawing ID</label>
+            <input id="prizeDrawingId" placeholder="drawing UUID (optional)" />
+            <label>Create Prize JSON</label>
+            <textarea id="prizeBody">{"drawing_id": "", "rank": 1, "name": "Grand Prize", "value_usd": 500.0}</textarea>
+            <div class="btn-row">
+                <button class="btn-get"
+                    onclick="apiCall('GET', '/api/v1/prizes' + (g('prizeDrawingId') ? '?drawing_id=' + g('prizeDrawingId') : ''))">List</button>
+                <button class="btn-post" onclick="apiCall('POST', '/api/v1/prizes', g('prizeBody'))">Create</button>
+            </div>
+        </div>
+
+        <!-- Fulfillments Card -->
+        <div class="card">
+            <h2>Fulfillments</h2>
+            <label>Fulfillment ID</label>
+            <input id="fulfillmentId" placeholder="fulfillment UUID" />
+            <label>Filter by User ID</label>
+            <input id="fulfillmentUserId" placeholder="user UUID (optional)" />
+            <label>Update Fulfillment JSON</label>
+            <textarea id="fulfillmentBody">{"status": "winner_notified"}</textarea>
+            <div class="btn-row">
+                <button class="btn-get"
+                    onclick="apiCall('GET', '/api/v1/fulfillments' + (g('fulfillmentUserId') ? '?user_id=' + g('fulfillmentUserId') : ''))">List</button>
+                <button class="btn-patch"
+                    onclick="apiCall('PUT', '/api/v1/fulfillments/' + g('fulfillmentId'), g('fulfillmentBody'))">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Panel -->
+    <div id="reportPanel" class="card" style="max-width:1200px;margin-top:16px;display:none;">
+        <h2>Sample Reports</h2>
+        <div id="reportContent" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;"></div>
+    </div>
+
+    <!-- Data Table -->
+    <div id="tablePanel" class="card" style="max-width:1200px;margin-top:16px;display:none;">
+        <h2>Data Viewer <span id="tableTitle" style="color:#94a3b8;font-size:13px;"></span></h2>
+        <div style="overflow-x:auto;">
+            <table id="dataTable" style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Response Panel -->
+    <div id="response">
+        <h3>Response</h3>
+        <div id="status"></div>
+        <pre id="output">Click a button above to make a request...</pre>
+    </div>
+
+    <script>
+        const BASE = 'http://localhost:8000';
+        const g = id => document.getElementById(id).value;
+        let lastSortCol = null;
+        let lastSortAsc = true;
+
+        // ── Auth Token Management ─────────────────────────────────────
+        let accessToken = localStorage.getItem('ft_access_token') || null;
+        let refreshToken = localStorage.getItem('ft_refresh_token') || null;
+
+        function saveTokens(access, refresh) {
+            accessToken = access;
+            refreshToken = refresh;
+            if (access) localStorage.setItem('ft_access_token', access);
+            else localStorage.removeItem('ft_access_token');
+            if (refresh) localStorage.setItem('ft_refresh_token', refresh);
+            else localStorage.removeItem('ft_refresh_token');
+            updateAuthUI();
+        }
+
+        function updateAuthUI() {
+            const el = document.getElementById('authStatus');
+            const roleEl = document.getElementById('authRole');
+            if (accessToken) {
+                try {
+                    const payload = JSON.parse(atob(accessToken.split('.')[1]));
+                    const exp = new Date(payload.exp * 1000);
+                    const remaining = Math.max(0, Math.round((exp - Date.now()) / 60000));
+                    el.textContent = `✓ Logged in as ${payload.sub} (${remaining}m left)`;
+                    el.style.color = '#22c55e';
+                    roleEl.textContent = payload.role || 'user';
+                    roleEl.style.color = payload.role === 'admin' ? '#f59e0b' : '#38bdf8';
+                } catch {
+                    el.textContent = '✓ Token stored';
+                    el.style.color = '#22c55e';
+                }
+            } else {
+                el.textContent = 'Not logged in';
+                el.style.color = '#ef4444';
+                roleEl.textContent = '—';
+                roleEl.style.color = '#94a3b8';
+            }
+        }
+        updateAuthUI();
+
+        async function authRegister() {
+            const body = {
+                email: g('authEmail'),
+                password: g('authPassword'),
+                date_of_birth: g('authDob'),
+                state: g('authState'),
+            };
+            const data = await apiCall('POST', '/api/v1/auth/register', JSON.stringify(body));
+            if (data && data.access_token) {
+                saveTokens(data.access_token, data.refresh_token);
+            }
+        }
+
+        async function authLogin() {
+            const body = { email: g('authEmail'), password: g('authPassword') };
+            const data = await apiCall('POST', '/api/v1/auth/login', JSON.stringify(body));
+            if (data && data.access_token) {
+                saveTokens(data.access_token, data.refresh_token);
+            }
+        }
+
+        async function authRefresh() {
+            if (!refreshToken) { alert('No refresh token'); return; }
+            const data = await apiCall('POST', '/api/v1/auth/refresh', JSON.stringify({ refresh_token: refreshToken }));
+            if (data && data.access_token) {
+                saveTokens(data.access_token, refreshToken);
+            }
+        }
+
+        async function authMe() {
+            await apiCall('GET', '/api/v1/auth/me');
+        }
+
+        async function authLogout() {
+            await apiCall('POST', '/api/v1/auth/logout');
+            saveTokens(null, null);
+        }
+
+        function authClear() {
+            saveTokens(null, null);
+        }
+
+        // ── API Call with Auth ────────────────────────────────────────
+        async function apiCall(method, path, body) {
+            const statusEl = document.getElementById('status');
+            const outputEl = document.getElementById('output');
+            statusEl.textContent = `${method} ${path} ...`;
+            statusEl.className = '';
+
+            const opts = { method, headers: { 'Content-Type': 'application/json' } };
+            if (accessToken) {
+                opts.headers['Authorization'] = `Bearer ${accessToken}`;
+            }
+            if (body && (method === 'POST' || method === 'PATCH' || method === 'PUT')) {
+                opts.body = typeof body === 'string' ? body : JSON.stringify(body);
+            }
+
+            try {
+                const t0 = performance.now();
+                const res = await fetch(BASE + path, opts);
+                const elapsed = (performance.now() - t0).toFixed(0);
+                const ct = res.headers.get('content-type') || '';
+                let data;
+                if (ct.includes('json')) {
+                    data = await res.json();
+                } else {
+                    data = await res.text() || '(empty body)';
+                }
+
+                statusEl.textContent = `${method} ${path} → ${res.status} ${res.statusText} (${elapsed}ms)`;
+                statusEl.className = res.ok ? 'status-ok' : 'status-err';
+                outputEl.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+
+                // Auto-populate data table for list responses
+                if (data && data.items && Array.isArray(data.items) && data.items.length > 0) {
+                    renderTable(data.items, path);
+                }
+
+                return data;
+            } catch (err) {
+                statusEl.textContent = `${method} ${path} → ERROR`;
+                statusEl.className = 'status-err';
+                outputEl.textContent = err.message;
+                return null;
+            }
+        }
+
+        function renderTable(rows, title) {
+            const panel = document.getElementById('tablePanel');
+            const thead = document.getElementById('tableHead');
+            const tbody = document.getElementById('tableBody');
+            document.getElementById('tableTitle').textContent = `— ${title} (${rows.length} rows)`;
+            panel.style.display = 'block';
+
+            const cols = Object.keys(rows[0]);
+            thead.innerHTML = '<tr>' + cols.map(c =>
+                `<th onclick="sortTable('${c}')" style="cursor:pointer;padding:8px;border-bottom:2px solid #475569;color:#38bdf8;text-align:left;white-space:nowrap;">${c} ⇅</th>`
+            ).join('') + '</tr>';
+
+            window._tableData = rows;
+            window._tableCols = cols;
+            fillTableBody(rows, cols);
+        }
+
+        function fillTableBody(rows, cols) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = rows.map(r =>
+                '<tr>' + cols.map(c => {
+                    let v = r[c];
+                    if (v === null || v === undefined) v = '';
+                    if (typeof v === 'object') v = JSON.stringify(v);
+                    if (typeof v === 'string' && v.length > 40) v = v.slice(0, 37) + '...';
+                    return `<td style="padding:6px 8px;border-bottom:1px solid #334155;font-family:monospace;font-size:12px;">${v}</td>`;
+                }).join('') + '</tr>'
+            ).join('');
+        }
+
+        function sortTable(col) {
+            if (!window._tableData) return;
+            if (lastSortCol === col) { lastSortAsc = !lastSortAsc; } else { lastSortCol = col; lastSortAsc = true; }
+            const sorted = [...window._tableData].sort((a, b) => {
+                const av = a[col], bv = b[col];
+                if (av == null && bv == null) return 0;
+                if (av == null) return 1;
+                if (bv == null) return -1;
+                if (typeof av === 'number' && typeof bv === 'number') return lastSortAsc ? av - bv : bv - av;
+                return lastSortAsc ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+            });
+            fillTableBody(sorted, window._tableCols);
+        }
+
+        async function loadReport() {
+            const panel = document.getElementById('reportPanel');
+            const content = document.getElementById('reportContent');
+            panel.style.display = 'block';
+            content.innerHTML = '<p style="color:#94a3b8;">Loading...</p>';
+
+            const endpoints = [
+                { label: 'Users', path: '/api/v1/users?limit=100' },
+                { label: 'Profiles', path: '/api/v1/profiles?limit=100' },
+                { label: 'Drawings', path: '/api/v1/drawings?limit=100' },
+                { label: 'Sponsors', path: '/api/v1/sponsors?limit=100' },
+            ];
+
+            const results = await Promise.allSettled(
+                endpoints.map(e => fetch(BASE + e.path).then(r => r.json()).then(d => ({ ...e, data: d })))
+            );
+
+            let html = '';
+            for (const r of results) {
+                if (r.status === 'fulfilled') {
+                    const { label, data } = r.value;
+                    const count = data.pagination ? data.pagination.total_items : (data.items ? data.items.length : '?');
+                    let detail = '';
+                    if (label === 'Users' && data.items) {
+                        const roles = {};
+                        data.items.forEach(u => { roles[u.role || 'user'] = (roles[u.role || 'user'] || 0) + 1; });
+                        detail = Object.entries(roles).map(([k, v]) => `${k}: ${v}`).join(', ');
+                    }
+                    if (label === 'Profiles' && data.items) {
+                        const tiers = {};
+                        data.items.forEach(p => { const t = p.tier_code || 'none'; tiers[t] = (tiers[t] || 0) + 1; });
+                        const tierCount = Object.keys(tiers).length;
+                        detail = `${tierCount} unique tiers`;
+                    }
+                    if (label === 'Drawings' && data.items) {
+                        const statuses = {};
+                        data.items.forEach(d => { statuses[d.status || 'unknown'] = (statuses[d.status || 'unknown'] || 0) + 1; });
+                        detail = Object.entries(statuses).map(([k, v]) => `${k}: ${v}`).join(', ');
+                    }
+                    html += `<div style="background:#0f172a;padding:12px;border-radius:8px;">
+                        <div style="font-size:24px;font-weight:700;color:#38bdf8;">${count}</div>
+                        <div style="font-size:14px;color:#e2e8f0;">${label}</div>
+                        ${detail ? `<div style="font-size:11px;color:#94a3b8;margin-top:4px;">${detail}</div>` : ''}
+                    </div>`;
+                } else {
+                    html += `<div style="background:#0f172a;padding:12px;border-radius:8px;color:#ef4444;">Error loading</div>`;
+                }
+            }
+            content.innerHTML = html;
+        }
+    </script>
+</body>
+
+</html>
