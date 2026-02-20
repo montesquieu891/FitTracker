@@ -12,7 +12,7 @@ setup:
 
 # === Development server ===
 dev:
-	uvicorn fittrack.main:app --host 0.0.0.0 --port 8000 --reload --app-dir src
+	python -m uvicorn fittrack.main:app --host 0.0.0.0 --port 8000 --reload --app-dir src
 
 # === Testing ===
 test:
