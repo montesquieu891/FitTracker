@@ -40,7 +40,8 @@ def get_me(
         return svc.get_user_with_profile(user_id)
     except ProfileError as exc:
         raise HTTPException(
-            status_code=exc.status_code, detail=exc.detail,
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc
 
 
@@ -87,7 +88,8 @@ def upsert_my_profile(
         return svc.create_profile(user_id=user_id, data=data)
     except ProfileError as exc:
         raise HTTPException(
-            status_code=exc.status_code, detail=exc.detail,
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc
 
 
@@ -118,7 +120,8 @@ def patch_my_profile(
         )
     except ProfileError as exc:
         raise HTTPException(
-            status_code=exc.status_code, detail=exc.detail,
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc
 
 
@@ -146,5 +149,6 @@ def get_public_profile(user_id: str) -> dict[str, Any]:
         return svc.get_public_profile(user_id)
     except ProfileError as exc:
         raise HTTPException(
-            status_code=exc.status_code, detail=exc.detail,
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc

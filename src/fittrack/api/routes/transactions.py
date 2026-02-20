@@ -16,6 +16,7 @@ router = APIRouter(prefix="/api/v1/transactions", tags=["transactions"])
 
 def _get_repo() -> TransactionRepository:
     from fittrack.core.database import get_pool
+
     return TransactionRepository(pool=get_pool())
 
 

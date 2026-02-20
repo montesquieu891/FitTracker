@@ -9,14 +9,13 @@ Covers:
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
 
 from fittrack.core.config import Settings
 from fittrack.main import create_app
-
 
 # ── Fixtures ─────────────────────────────────────────────────────────
 

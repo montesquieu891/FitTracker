@@ -18,6 +18,7 @@ from fittrack.core.security import create_access_token, create_refresh_token
 
 # ── Helper app for testing dependencies in isolation ─────────────────
 
+
 def _make_test_app() -> FastAPI:
     """Build a minimal FastAPI app with test endpoints."""
     app = FastAPI()
@@ -59,6 +60,7 @@ def rbac_client() -> TestClient:
 
 
 # ── Tests ────────────────────────────────────────────────────────────
+
 
 class TestGetCurrentUser:
     """get_current_user dependency."""

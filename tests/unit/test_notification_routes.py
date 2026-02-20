@@ -11,9 +11,7 @@ class TestListNotifications:
     """Test GET /api/v1/notifications."""
 
     @patch("fittrack.api.routes.notifications._get_service")
-    def test_requires_auth(
-        self, mock_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_requires_auth(self, mock_factory: MagicMock, client: TestClient) -> None:
         resp = client.get("/api/v1/notifications")
         assert resp.status_code == 401
 
@@ -41,9 +39,7 @@ class TestListNotifications:
             },
         }
         mock_factory.return_value = mock_svc
-        resp = client.get(
-            "/api/v1/notifications", headers=user_headers
-        )
+        resp = client.get("/api/v1/notifications", headers=user_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert len(data["items"]) == 1
@@ -53,9 +49,7 @@ class TestUnreadCount:
     """Test GET /api/v1/notifications/unread-count."""
 
     @patch("fittrack.api.routes.notifications._get_service")
-    def test_requires_auth(
-        self, mock_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_requires_auth(self, mock_factory: MagicMock, client: TestClient) -> None:
         resp = client.get("/api/v1/notifications/unread-count")
         assert resp.status_code == 401
 
@@ -94,9 +88,7 @@ class TestGetNotification:
             "title": "Hello",
         }
         mock_factory.return_value = mock_svc
-        resp = client.get(
-            "/api/v1/notifications/n1", headers=user_headers
-        )
+        resp = client.get("/api/v1/notifications/n1", headers=user_headers)
         assert resp.status_code == 200
 
     @patch("fittrack.api.routes.notifications._get_service")
@@ -113,9 +105,7 @@ class TestGetNotification:
             "title": "Private",
         }
         mock_factory.return_value = mock_svc
-        resp = client.get(
-            "/api/v1/notifications/n1", headers=user_headers
-        )
+        resp = client.get("/api/v1/notifications/n1", headers=user_headers)
         assert resp.status_code == 403
 
     @patch("fittrack.api.routes.notifications._get_service")
@@ -128,13 +118,9 @@ class TestGetNotification:
         from fittrack.services.notifications import NotificationError
 
         mock_svc = MagicMock()
-        mock_svc.get_notification.side_effect = NotificationError(
-            "not found", 404
-        )
+        mock_svc.get_notification.side_effect = NotificationError("not found", 404)
         mock_factory.return_value = mock_svc
-        resp = client.get(
-            "/api/v1/notifications/n999", headers=user_headers
-        )
+        resp = client.get("/api/v1/notifications/n999", headers=user_headers)
         assert resp.status_code == 404
 
 
@@ -142,9 +128,7 @@ class TestMarkAsRead:
     """Test PUT /api/v1/notifications/{id}/read."""
 
     @patch("fittrack.api.routes.notifications._get_service")
-    def test_requires_auth(
-        self, mock_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_requires_auth(self, mock_factory: MagicMock, client: TestClient) -> None:
         resp = client.put("/api/v1/notifications/n1/read")
         assert resp.status_code == 401
 
@@ -161,9 +145,7 @@ class TestMarkAsRead:
             "is_read": True,
         }
         mock_factory.return_value = mock_svc
-        resp = client.put(
-            "/api/v1/notifications/n1/read", headers=user_headers
-        )
+        resp = client.put("/api/v1/notifications/n1/read", headers=user_headers)
         assert resp.status_code == 200
         assert resp.json()["is_read"] is True
 
@@ -177,13 +159,9 @@ class TestMarkAsRead:
         from fittrack.services.notifications import NotificationError
 
         mock_svc = MagicMock()
-        mock_svc.mark_as_read.side_effect = NotificationError(
-            "not found", 404
-        )
+        mock_svc.mark_as_read.side_effect = NotificationError("not found", 404)
         mock_factory.return_value = mock_svc
-        resp = client.put(
-            "/api/v1/notifications/n999/read", headers=user_headers
-        )
+        resp = client.put("/api/v1/notifications/n999/read", headers=user_headers)
         assert resp.status_code == 404
 
 
@@ -191,9 +169,7 @@ class TestAdminUserRoutes:
     """Test admin user management routes."""
 
     @patch("fittrack.api.routes.admin_users._get_service")
-    def test_search_requires_admin(
-        self, mock_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_search_requires_admin(self, mock_factory: MagicMock, client: TestClient) -> None:
         resp = client.get("/api/v1/admin/users")
         assert resp.status_code == 401
 
@@ -215,9 +191,7 @@ class TestAdminUserRoutes:
             },
         }
         mock_factory.return_value = mock_svc
-        resp = client.get(
-            "/api/v1/admin/users", headers=admin_headers
-        )
+        resp = client.get("/api/v1/admin/users", headers=admin_headers)
         assert resp.status_code == 200
 
     @patch("fittrack.api.routes.admin_users._get_service")
@@ -285,8 +259,7 @@ class TestAdminUserRoutes:
         user_headers: dict[str, str],
     ) -> None:
         resp = client.post(
-            "/api/v1/admin/users/u1/adjust-points?"
-            "amount=100&reason=test",
+            "/api/v1/admin/users/u1/adjust-points?amount=100&reason=test",
             headers=user_headers,
         )
         assert resp.status_code == 403
@@ -306,8 +279,7 @@ class TestAdminUserRoutes:
         }
         mock_factory.return_value = mock_svc
         resp = client.post(
-            "/api/v1/admin/users/u1/adjust-points?"
-            "amount=100&reason=bonus",
+            "/api/v1/admin/users/u1/adjust-points?amount=100&reason=bonus",
             headers=admin_headers,
         )
         assert resp.status_code == 200
@@ -325,9 +297,7 @@ class TestAdminUserRoutes:
             "email": "a@b.com",
         }
         mock_factory.return_value = mock_svc
-        resp = client.get(
-            "/api/v1/admin/users/u1", headers=admin_headers
-        )
+        resp = client.get("/api/v1/admin/users/u1", headers=admin_headers)
         assert resp.status_code == 200
 
 
@@ -335,9 +305,7 @@ class TestAnalyticsRoutes:
     """Test admin analytics routes."""
 
     @patch("fittrack.api.routes.admin_analytics._get_service")
-    def test_overview_requires_admin(
-        self, mock_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_overview_requires_admin(self, mock_factory: MagicMock, client: TestClient) -> None:
         resp = client.get("/api/v1/admin/analytics/overview")
         assert resp.status_code == 401
 
@@ -427,9 +395,7 @@ class TestAnalyticsRoutes:
         from fittrack.services.analytics import AnalyticsError
 
         mock_svc = MagicMock()
-        mock_svc.get_registration_trends.side_effect = AnalyticsError(
-            "Invalid period", 400
-        )
+        mock_svc.get_registration_trends.side_effect = AnalyticsError("Invalid period", 400)
         mock_factory.return_value = mock_svc
         resp = client.get(
             "/api/v1/admin/analytics/registrations?period=yearly",

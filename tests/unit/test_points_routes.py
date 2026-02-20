@@ -13,7 +13,9 @@ class TestPointsBalance:
         assert resp.status_code == 401
 
     def test_get_balance(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         # get_current_user query, then get_balance, then get_points_earned
@@ -36,7 +38,9 @@ class TestPointsTransactions:
         assert resp.status_code == 401
 
     def test_get_transactions(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(
@@ -51,7 +55,9 @@ class TestPointsTransactions:
         assert "pagination" in data
 
     def test_pagination(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(
@@ -59,9 +65,7 @@ class TestPointsTransactions:
             ["user_id", "email", "role", "status", "point_balance"],
             [("test-user", "user@example.com", "user", "active", 0)],
         )
-        resp = client.get(
-            "/api/v1/points/transactions?page=3&limit=5", headers=user_headers
-        )
+        resp = client.get("/api/v1/points/transactions?page=3&limit=5", headers=user_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert data["pagination"]["page"] == 3
@@ -74,7 +78,9 @@ class TestPointsDaily:
         assert resp.status_code == 401
 
     def test_daily_status(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(
@@ -97,7 +103,9 @@ class TestPointsStreak:
         assert resp.status_code == 401
 
     def test_streak(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(

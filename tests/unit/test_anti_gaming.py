@@ -309,9 +309,7 @@ class TestComputeTierStats:
         assert stats["count"] == 0
 
     def test_single_activity(self):
-        activities = [
-            {"activity_type": "steps", "metrics": {"step_count": 10000}}
-        ]
+        activities = [{"activity_type": "steps", "metrics": {"step_count": 10000}}]
         stats = compute_tier_stats(activities, "steps")
         assert stats["avg"] == 10000
         assert stats["stddev"] == 0

@@ -47,50 +47,28 @@ class AnalyticsService:
 
     # ── Overview ─────────────────────────────────────────────────
 
-    def get_overview(
-        self, now: datetime | None = None
-    ) -> dict[str, Any]:
+    def get_overview(self, now: datetime | None = None) -> dict[str, Any]:
         """Dashboard overview metrics."""
         if now is None:
             now = datetime.now(tz=UTC)
 
         total_users = self.user_repo.count()
-        active_users = self.user_repo.count(
-            filters={"status": "active"}
-        )
-        suspended_users = self.user_repo.count(
-            filters={"status": "suspended"}
-        )
-        banned_users = self.user_repo.count(
-            filters={"status": "banned"}
-        )
-        pending_users = self.user_repo.count(
-            filters={"status": "pending"}
-        )
+        active_users = self.user_repo.count(filters={"status": "active"})
+        suspended_users = self.user_repo.count(filters={"status": "suspended"})
+        banned_users = self.user_repo.count(filters={"status": "banned"})
+        pending_users = self.user_repo.count(filters={"status": "pending"})
 
         # Active drawings (open or scheduled)
-        open_drawings = self.drawing_repo.count(
-            filters={"status": "open"}
-        )
-        scheduled_drawings = self.drawing_repo.count(
-            filters={"status": "scheduled"}
-        )
-        completed_drawings = self.drawing_repo.count(
-            filters={"status": "completed"}
-        )
+        open_drawings = self.drawing_repo.count(filters={"status": "open"})
+        scheduled_drawings = self.drawing_repo.count(filters={"status": "scheduled"})
+        completed_drawings = self.drawing_repo.count(filters={"status": "completed"})
 
         # DAU/MAU approximation from activity data
-        today_start = now.replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
-        month_start = now.replace(
-            day=1, hour=0, minute=0, second=0, microsecond=0
-        )
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
         # Get daily active users from activities
-        daily_activities = self.activity_repo.find_all(
-            limit=10000, offset=0
-        )
+        daily_activities = self.activity_repo.find_all(limit=10000, offset=0)
         dau_users = set()
         mau_users = set()
         for act in daily_activities:
@@ -138,8 +116,7 @@ class AnalyticsService:
         """
         if period not in VALID_TREND_PERIODS:
             raise AnalyticsError(
-                f"Invalid period: {period}. Valid: "
-                f"{list(VALID_TREND_PERIODS)}",
+                f"Invalid period: {period}. Valid: {list(VALID_TREND_PERIODS)}",
                 400,
             )
 
@@ -175,9 +152,7 @@ class AnalyticsService:
         return {
             "period": period,
             "days": days,
-            "data": [
-                {"date": k, "count": v} for k, v in sorted_buckets
-            ],
+            "data": [{"date": k, "count": v} for k, v in sorted_buckets],
             "total": sum(buckets.values()),
         }
 
@@ -195,18 +170,14 @@ class AnalyticsService:
 
     # ── Activity Metrics ─────────────────────────────────────────
 
-    def get_activity_metrics(
-        self, days: int = 30, now: datetime | None = None
-    ) -> dict[str, Any]:
+    def get_activity_metrics(self, days: int = 30, now: datetime | None = None) -> dict[str, Any]:
         """Activity metrics: averages, by type, by tier."""
         if now is None:
             now = datetime.now(tz=UTC)
 
         start_date = now - timedelta(days=days)
 
-        all_activities = self.activity_repo.find_all(
-            limit=50000, offset=0
-        )
+        all_activities = self.activity_repo.find_all(limit=50000, offset=0)
 
         # Filter to date range
         activities = []
@@ -229,9 +200,7 @@ class AnalyticsService:
         total = len(activities)
         user_ids = {a.get("user_id") for a in activities if a.get("user_id")}
         users_with_activity = len(user_ids)
-        avg_per_user = (
-            round(total / users_with_activity, 1) if users_with_activity else 0
-        )
+        avg_per_user = round(total / users_with_activity, 1) if users_with_activity else 0
 
         # By type
         by_type: dict[str, int] = {t: 0 for t in ACTIVITY_TYPES}
@@ -253,9 +222,7 @@ class AnalyticsService:
 
     # ── Drawing Metrics ──────────────────────────────────────────
 
-    def get_drawing_metrics(
-        self, now: datetime | None = None
-    ) -> dict[str, Any]:
+    def get_drawing_metrics(self, now: datetime | None = None) -> dict[str, Any]:
         """Drawing participation and ticket purchase metrics."""
         if now is None:
             now = datetime.now(tz=UTC)
@@ -283,23 +250,15 @@ class AnalyticsService:
         # Get all tickets
         all_tickets = self.ticket_repo.find_all(limit=50000, offset=0)
         total_tickets = len(all_tickets)
-        ticket_users = {
-            t.get("user_id") for t in all_tickets if t.get("user_id")
-        }
+        ticket_users = {t.get("user_id") for t in all_tickets if t.get("user_id")}
         unique_participants = len(ticket_users)
 
         # Participation rate
         total_users = self.user_repo.count(filters={"status": "active"})
-        participation_rate = (
-            round(unique_participants / total_users * 100, 1)
-            if total_users
-            else 0
-        )
+        participation_rate = round(unique_participants / total_users * 100, 1) if total_users else 0
 
         avg_tickets_per_user = (
-            round(total_tickets / unique_participants, 1)
-            if unique_participants
-            else 0
+            round(total_tickets / unique_participants, 1) if unique_participants else 0
         )
 
         return {

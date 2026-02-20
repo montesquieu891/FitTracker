@@ -117,4 +117,4 @@ def get_current_user_id(
     user_id = current_user.get("sub")
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token payload")
-    return user_id
+    return str(user_id)

@@ -18,7 +18,10 @@ class TestDrawingFlow:
         """Ensure DB pool is mocked for all tests."""
 
     def test_admin_creates_drawing(
-        self, client: TestClient, _mock_repos: None, admin_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        admin_headers: dict[str, str],
     ) -> None:
         """Admin can create a new drawing."""
         mock_svc = MagicMock()
@@ -50,7 +53,10 @@ class TestDrawingFlow:
             assert resp.status_code in (200, 201)
 
     def test_admin_schedules_drawing(
-        self, client: TestClient, _mock_repos: None, admin_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        admin_headers: dict[str, str],
     ) -> None:
         """Admin can transition drawing from draft to scheduled."""
         mock_svc = MagicMock()
@@ -70,7 +76,10 @@ class TestDrawingFlow:
             assert resp.status_code == 200
 
     def test_user_purchases_ticket(
-        self, client: TestClient, _mock_repos: None, user_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        user_headers: dict[str, str],
     ) -> None:
         """User can purchase tickets for an open drawing."""
         mock_svc = MagicMock()
@@ -93,7 +102,9 @@ class TestDrawingFlow:
             assert resp.status_code in (200, 201)
 
     def test_ticket_purchase_requires_auth(
-        self, client: TestClient, _mock_repos: None,
+        self,
+        client: TestClient,
+        _mock_repos: None,
     ) -> None:
         """Ticket purchase requires authentication."""
         resp = client.post(
@@ -175,7 +186,10 @@ class TestDrawingFlow:
         assert TICKET_SALES_CLOSE_MINUTES_BEFORE == 5
 
     def test_list_drawings(
-        self, client: TestClient, _mock_repos: None, user_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        user_headers: dict[str, str],
     ) -> None:
         """Users can list available drawings."""
         mock_svc = MagicMock()
@@ -222,8 +236,13 @@ class TestDrawingFlow:
         from fittrack.core.constants import FULFILLMENT_STATUSES
 
         expected_order = [
-            "pending", "winner_notified", "address_confirmed",
-            "address_invalid", "shipped", "delivered", "forfeited",
+            "pending",
+            "winner_notified",
+            "address_confirmed",
+            "address_invalid",
+            "shipped",
+            "delivered",
+            "forfeited",
         ]
         assert expected_order == FULFILLMENT_STATUSES
 
@@ -239,7 +258,10 @@ class TestDrawingFlow:
         assert "cancelled" in DRAWING_STATUSES
 
     def test_view_user_tickets(
-        self, client: TestClient, _mock_repos: None, user_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        user_headers: dict[str, str],
     ) -> None:
         """Users can view their purchased tickets."""
         mock_repo = MagicMock()
@@ -254,7 +276,8 @@ class TestDrawingFlow:
         mock_repo.count.return_value = 1
 
         with patch(
-            "fittrack.api.routes.tickets._get_repo", return_value=mock_repo,
+            "fittrack.api.routes.tickets._get_repo",
+            return_value=mock_repo,
         ):
             resp = client.get("/api/v1/tickets", headers=user_headers)
             assert resp.status_code == 200

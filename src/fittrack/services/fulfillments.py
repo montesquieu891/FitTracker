@@ -73,8 +73,7 @@ class FulfillmentService:
 
         if new_status not in allowed:
             raise FulfillmentError(
-                f"Cannot transition from '{current}' to '{new_status}'. "
-                f"Allowed: {allowed}"
+                f"Cannot transition from '{current}' to '{new_status}'. Allowed: {allowed}"
             )
 
         now = datetime.now(tz=UTC).isoformat()
@@ -103,7 +102,8 @@ class FulfillmentService:
 
         self.fulfillment_repo.update(fulfillment_id, data=update_data)
         fulfillment.update(update_data)
-        return fulfillment
+        result: dict[str, Any] = fulfillment
+        return result
 
     # ── Convenience methods ─────────────────────────────────────────
 
@@ -123,9 +123,7 @@ class FulfillmentService:
         required = ["street", "city", "state", "zip_code"]
         missing = [f for f in required if not shipping_address.get(f)]
         if missing:
-            raise FulfillmentError(
-                f"Missing address fields: {', '.join(missing)}"
-            )
+            raise FulfillmentError(f"Missing address fields: {', '.join(missing)}")
 
         return self.transition_status(
             fulfillment_id,
@@ -163,9 +161,7 @@ class FulfillmentService:
 
     def forfeit(self, fulfillment_id: str, reason: str = "") -> dict[str, Any]:
         """Forfeit a prize (timeout or winner request)."""
-        return self.transition_status(
-            fulfillment_id, "forfeited", notes=reason or "Forfeited"
-        )
+        return self.transition_status(fulfillment_id, "forfeited", notes=reason or "Forfeited")
 
     # ── Queries ─────────────────────────────────────────────────────
 
@@ -174,7 +170,8 @@ class FulfillmentService:
         f = self.fulfillment_repo.find_by_id(fulfillment_id)
         if f is None:
             raise FulfillmentError("Fulfillment not found", status_code=404)
-        return f
+        result: dict[str, Any] = f
+        return result
 
     def list_fulfillments(
         self,
@@ -196,9 +193,7 @@ class FulfillmentService:
 
         total = self.fulfillment_repo.count(filters=filters)
         offset = (page - 1) * limit
-        items = self.fulfillment_repo.find_all(
-            limit=limit, offset=offset, filters=filters
-        )
+        items = self.fulfillment_repo.find_all(limit=limit, offset=offset, filters=filters)
         total_pages = max(1, (total + limit - 1) // limit)
 
         return {
@@ -240,7 +235,7 @@ class FulfillmentService:
             notified_at = notified_at.replace(tzinfo=UTC)
 
         warning_deadline = notified_at + timedelta(days=ADDRESS_CONFIRM_WARNING_DAYS)
-        return now >= warning_deadline
+        return bool(now >= warning_deadline)
 
     def check_forfeit_timeout(
         self,
@@ -275,26 +270,20 @@ class FulfillmentService:
             notified_at = notified_at.replace(tzinfo=UTC)
 
         forfeit_deadline = notified_at + timedelta(days=ADDRESS_CONFIRM_FORFEIT_DAYS)
-        return now >= forfeit_deadline
+        return bool(now >= forfeit_deadline)
 
-    def process_timeouts(
-        self, now: datetime | None = None
-    ) -> dict[str, Any]:
+    def process_timeouts(self, now: datetime | None = None) -> dict[str, Any]:
         """Process all fulfillments for warnings and forfeitures."""
         if now is None:
             now = datetime.now(tz=UTC)
 
         # Get active fulfillments (not delivered/forfeited)
-        active_statuses = [
-            "pending", "winner_notified", "address_confirmed", "address_invalid"
-        ]
+        active_statuses = ["pending", "winner_notified", "address_confirmed", "address_invalid"]
         warnings_sent = 0
         forfeited_count = 0
 
         for status in active_statuses:
-            items = self.fulfillment_repo.find_all(
-                limit=1000, offset=0, filters={"status": status}
-            )
+            items = self.fulfillment_repo.find_all(limit=1000, offset=0, filters={"status": status})
             for item in items:
                 fid = item.get("fulfillment_id", "")
                 if not fid:

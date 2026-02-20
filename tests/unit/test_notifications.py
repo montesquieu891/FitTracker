@@ -293,9 +293,7 @@ class TestReadUnread:
 
     def test_get_user_notifications_unread_only(self) -> None:
         svc = _make_service()
-        svc.notification_repo.find_all.return_value = [
-            {"notification_id": "n1", "is_read": 0}
-        ]
+        svc.notification_repo.find_all.return_value = [{"notification_id": "n1", "is_read": 0}]
         svc.notification_repo.count.return_value = 1
         result = svc.get_user_notifications("u1", is_read=False)
         assert result["pagination"]["total_items"] == 1
@@ -356,9 +354,7 @@ class TestGetNotification:
     """Test single notification retrieval."""
 
     def test_get_found(self) -> None:
-        notifications = [
-            {"notification_id": "n1", "user_id": "u1", "title": "Hi"}
-        ]
+        notifications = [{"notification_id": "n1", "user_id": "u1", "title": "Hi"}]
         svc = _make_service(notifications=notifications)
         result = svc.get_notification("n1")
         assert result["title"] == "Hi"

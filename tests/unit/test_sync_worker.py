@@ -110,9 +110,7 @@ class MockPointsService:
         self.points_per_activity = points_per_activity
         self.awards: list[tuple[str, dict[str, Any]]] = []
 
-    def award_points_for_activity(
-        self, user_id: str, activity: dict[str, Any]
-    ) -> dict[str, Any]:
+    def award_points_for_activity(self, user_id: str, activity: dict[str, Any]) -> dict[str, Any]:
         self.awards.append((user_id, activity))
         return {"points_awarded": self.points_per_activity}
 
@@ -200,7 +198,9 @@ class TestSyncConnection:
         conn = _make_connection(access_token="")
         provider = MockProvider()
         worker = SyncWorker(
-            MockRepo(), MockRepo(), MockPointsService(),
+            MockRepo(),
+            MockRepo(),
+            MockPointsService(),
             providers={"google_fit": provider},
         )
         result = worker.sync_connection(conn)
@@ -211,7 +211,9 @@ class TestSyncConnection:
         conn = _make_connection()
         provider = MockProvider(error=ProviderError("google_fit", "API down"))
         worker = SyncWorker(
-            MockRepo([conn]), MockRepo(), MockPointsService(),
+            MockRepo([conn]),
+            MockRepo(),
+            MockPointsService(),
             providers={"google_fit": provider},
         )
         result = worker.sync_connection(conn)
@@ -226,7 +228,9 @@ class TestSyncConnection:
         points = MockPointsService(points_per_activity=50)
         conn_repo = MockRepo([conn])
         worker = SyncWorker(
-            conn_repo, activity_repo, points,
+            conn_repo,
+            activity_repo,
+            points,
             providers={"google_fit": provider},
         )
         result = worker.sync_connection(conn)
@@ -250,7 +254,9 @@ class TestSyncConnection:
         }
         activity_repo = MockRepo([existing])
         worker = SyncWorker(
-            MockRepo([conn]), activity_repo, MockPointsService(),
+            MockRepo([conn]),
+            activity_repo,
+            MockPointsService(),
             providers={"google_fit": provider},
         )
         result = worker.sync_connection(conn)
@@ -262,7 +268,9 @@ class TestSyncConnection:
         conn_repo = MockRepo([conn])
         provider = MockProvider(activities=[])
         worker = SyncWorker(
-            conn_repo, MockRepo(), MockPointsService(),
+            conn_repo,
+            MockRepo(),
+            MockPointsService(),
             providers={"google_fit": provider},
         )
         worker.sync_connection(conn)
@@ -285,7 +293,9 @@ class TestRunBatch:
         conn = _make_connection(last_sync_at=None)
         provider = MockProvider(activities=[_make_raw_activity()])
         worker = SyncWorker(
-            MockRepo([conn]), MockRepo(), MockPointsService(points_per_activity=25),
+            MockRepo([conn]),
+            MockRepo(),
+            MockPointsService(points_per_activity=25),
             providers={"google_fit": provider},
         )
         results = worker.run_batch()
@@ -301,7 +311,9 @@ class TestRunBatch:
         provider = MockProvider(error=ProviderError("google_fit", "API down"))
         conn_repo = MockRepo([conn1, conn2])
         worker = SyncWorker(
-            conn_repo, MockRepo(), MockPointsService(),
+            conn_repo,
+            MockRepo(),
+            MockPointsService(),
             providers={"google_fit": provider},
         )
         results = worker.run_batch()

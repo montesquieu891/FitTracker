@@ -6,17 +6,20 @@ Winner endpoint for confirming shipping address.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from fittrack.api.deps import get_current_user_id, require_admin
 from fittrack.api.schemas.fulfillments import FulfillmentCreate, FulfillmentUpdate
 
+if TYPE_CHECKING:
+    from fittrack.services.fulfillments import FulfillmentService
+
 router = APIRouter(prefix="/api/v1/fulfillments", tags=["fulfillments"])
 
 
-def _get_service():  # type: ignore[no-untyped-def]
+def _get_service() -> FulfillmentService:
     from fittrack.core.database import get_pool
     from fittrack.repositories.fulfillment_repository import FulfillmentRepository
     from fittrack.services.fulfillments import FulfillmentService
@@ -34,9 +37,7 @@ def list_fulfillments(
 ) -> dict[str, Any]:
     """List fulfillments with pagination (admin only)."""
     service = _get_service()
-    return service.list_fulfillments(
-        user_id=user_id, status=status, page=page, limit=limit
-    )
+    return service.list_fulfillments(user_id=user_id, status=status, page=page, limit=limit)
 
 
 @router.get("/{fulfillment_id}")
@@ -95,9 +96,7 @@ def update_fulfillment(
                 **{k: v for k, v in data.items() if k != "status"},
             )
         except FulfillmentError as e:
-            raise HTTPException(
-                status_code=e.status_code, detail=e.detail
-            ) from e
+            raise HTTPException(status_code=e.status_code, detail=e.detail) from e
 
     # Non-status updates (notes, etc.)
     from fittrack.core.database import get_pool
@@ -137,9 +136,7 @@ def ship_prize(
 
     service = _get_service()
     try:
-        return service.ship_prize(
-            fulfillment_id, carrier=carrier, tracking_number=tracking_number
-        )
+        return service.ship_prize(fulfillment_id, carrier=carrier, tracking_number=tracking_number)
     except FulfillmentError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail) from e
 

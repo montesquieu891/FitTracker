@@ -11,9 +11,7 @@ class TestPublicDrawingRoutes:
     """Test public /api/v1/drawings endpoints."""
 
     @patch("fittrack.api.routes.drawings._get_drawing_service")
-    def test_list_drawings(
-        self, mock_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_list_drawings(self, mock_factory: MagicMock, client: TestClient) -> None:
         mock_svc = MagicMock()
         mock_svc.list_drawings.return_value = {
             "items": [{"drawing_id": "d1", "name": "Daily Draw"}],
@@ -54,9 +52,7 @@ class TestPublicDrawingRoutes:
         assert resp.status_code == 400
 
     @patch("fittrack.api.routes.drawings._get_drawing_service")
-    def test_get_drawing(
-        self, mock_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_get_drawing(self, mock_factory: MagicMock, client: TestClient) -> None:
         mock_svc = MagicMock()
         mock_svc.get_drawing.return_value = {
             "drawing_id": "d1",
@@ -70,9 +66,7 @@ class TestPublicDrawingRoutes:
         assert resp.json()["drawing_id"] == "d1"
 
     @patch("fittrack.api.routes.drawings._get_drawing_service")
-    def test_get_drawing_not_found(
-        self, mock_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_get_drawing_not_found(self, mock_factory: MagicMock, client: TestClient) -> None:
         from fittrack.services.drawings import DrawingError
 
         mock_svc = MagicMock()
@@ -82,9 +76,7 @@ class TestPublicDrawingRoutes:
         assert resp.status_code == 404
 
     @patch("fittrack.api.routes.drawings._get_drawing_service")
-    def test_get_results(
-        self, mock_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_get_results(self, mock_factory: MagicMock, client: TestClient) -> None:
         mock_svc = MagicMock()
         mock_svc.get_results.return_value = {
             "drawing_id": "d1",
@@ -97,9 +89,7 @@ class TestPublicDrawingRoutes:
         assert resp.json()["total_tickets"] == 100
 
     @patch("fittrack.api.routes.drawings._get_drawing_service")
-    def test_get_results_not_completed(
-        self, mock_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_get_results_not_completed(self, mock_factory: MagicMock, client: TestClient) -> None:
         from fittrack.services.drawings import DrawingError
 
         mock_svc = MagicMock()
@@ -169,9 +159,7 @@ class TestTicketPurchaseRoutes:
             "new_balance": 0,
         }
         mock_factory.return_value = mock_svc
-        resp = client.post(
-            "/api/v1/drawings/d1/tickets?quantity=5", headers=user_headers
-        )
+        resp = client.post("/api/v1/drawings/d1/tickets?quantity=5", headers=user_headers)
         assert resp.status_code == 201
         assert resp.json()["quantity"] == 5
 
@@ -202,9 +190,7 @@ class TestTicketPurchaseRoutes:
 class TestAdminDrawingRoutes:
     """Test admin drawing management endpoints."""
 
-    def test_create_requires_admin(
-        self, client: TestClient, user_headers: dict
-    ) -> None:
+    def test_create_requires_admin(self, client: TestClient, user_headers: dict) -> None:
         resp = client.post(
             "/api/v1/drawings",
             json={
@@ -254,9 +240,7 @@ class TestAdminDrawingRoutes:
         client: TestClient,
         user_headers: dict,
     ) -> None:
-        resp = client.post(
-            "/api/v1/drawings/d1/execute", headers=user_headers
-        )
+        resp = client.post("/api/v1/drawings/d1/execute", headers=user_headers)
         assert resp.status_code == 403
 
     @patch("fittrack.api.routes.drawings._get_executor")
@@ -274,9 +258,7 @@ class TestAdminDrawingRoutes:
             "winners": [{"user_id": "u1", "prize_id": "p1"}],
         }
         mock_factory.return_value = mock_executor
-        resp = client.post(
-            "/api/v1/drawings/d1/execute", headers=admin_headers
-        )
+        resp = client.post("/api/v1/drawings/d1/execute", headers=admin_headers)
         assert resp.status_code == 200
         assert resp.json()["status"] == "completed"
 
@@ -293,9 +275,7 @@ class TestAdminDrawingRoutes:
             "status": "scheduled",
         }
         mock_factory.return_value = mock_svc
-        resp = client.post(
-            "/api/v1/drawings/d1/schedule", headers=admin_headers
-        )
+        resp = client.post("/api/v1/drawings/d1/schedule", headers=admin_headers)
         assert resp.status_code == 200
         assert resp.json()["status"] == "scheduled"
 
@@ -312,9 +292,7 @@ class TestAdminDrawingRoutes:
             "status": "open",
         }
         mock_factory.return_value = mock_svc
-        resp = client.post(
-            "/api/v1/drawings/d1/open", headers=admin_headers
-        )
+        resp = client.post("/api/v1/drawings/d1/open", headers=admin_headers)
         assert resp.status_code == 200
 
     @patch("fittrack.api.routes.drawings._get_drawing_service")
@@ -330,9 +308,7 @@ class TestAdminDrawingRoutes:
             "status": "closed",
         }
         mock_factory.return_value = mock_svc
-        resp = client.post(
-            "/api/v1/drawings/d1/close", headers=admin_headers
-        )
+        resp = client.post("/api/v1/drawings/d1/close", headers=admin_headers)
         assert resp.status_code == 200
 
     @patch("fittrack.api.routes.drawings._get_drawing_service")
@@ -348,15 +324,9 @@ class TestAdminDrawingRoutes:
             "status": "cancelled",
         }
         mock_factory.return_value = mock_svc
-        resp = client.post(
-            "/api/v1/drawings/d1/cancel", headers=admin_headers
-        )
+        resp = client.post("/api/v1/drawings/d1/cancel", headers=admin_headers)
         assert resp.status_code == 200
 
-    def test_delete_requires_admin(
-        self, client: TestClient, user_headers: dict
-    ) -> None:
-        resp = client.delete(
-            "/api/v1/drawings/d1", headers=user_headers
-        )
+    def test_delete_requires_admin(self, client: TestClient, user_headers: dict) -> None:
+        resp = client.delete("/api/v1/drawings/d1", headers=user_headers)
         assert resp.status_code == 403

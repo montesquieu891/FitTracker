@@ -136,9 +136,7 @@ class TicketService:
 
         # Update total_tickets count on drawing
         current_total = drawing.get("total_tickets", 0) or 0
-        self.drawing_repo.update(
-            drawing_id, data={"total_tickets": current_total + quantity}
-        )
+        self.drawing_repo.update(drawing_id, data={"total_tickets": current_total + quantity})
 
         return {
             "purchase_id": txn_id,
@@ -168,12 +166,13 @@ class TicketService:
 
     def get_drawing_tickets(self, drawing_id: str) -> list[dict[str, Any]]:
         """Get all tickets for a drawing."""
-        return self.ticket_repo.find_by_drawing(drawing_id)
+        result: list[dict[str, Any]] = self.ticket_repo.find_by_drawing(drawing_id)
+        return result
 
     def _get_balance(self, user_id: str) -> int:
         """Get user's current point balance."""
         try:
-            return self.transaction_repo.get_user_balance(user_id)
+            return int(self.transaction_repo.get_user_balance(user_id))
         except Exception:
             # Fallback: sum transactions
             txns = self.transaction_repo.find_by_user_id(user_id)
@@ -190,10 +189,6 @@ class TicketService:
             if user:
                 current = user.get("point_balance", 0) or 0
                 new_balance = max(0, current - amount)
-                self.user_repo.update(
-                    user_id, data={"point_balance": new_balance}
-                )
+                self.user_repo.update(user_id, data={"point_balance": new_balance})
         except Exception:
-            logger.warning(
-                "Could not update user balance for %s", user_id, exc_info=True
-            )
+            logger.warning("Could not update user balance for %s", user_id, exc_info=True)

@@ -17,6 +17,7 @@ from fittrack.services.auth import (
 
 # ── Helpers ──────────────────────────────────────────────────────────
 
+
 def _make_user_repo(users: list[dict[str, Any]] | None = None) -> MagicMock:
     """Create a mock user repository."""
     repo = MagicMock()
@@ -65,6 +66,7 @@ def _make_hashed_user(
 
 
 # ── Registration Tests ──────────────────────────────────────────────
+
 
 class TestRegistration:
     """Registration with full validation."""
@@ -198,6 +200,7 @@ class TestRegistration:
 
 # ── Login Tests ──────────────────────────────────────────────────────
 
+
 class TestLogin:
     """Login with email/password."""
 
@@ -259,6 +262,7 @@ class TestLogin:
 
 # ── Account Lockout Tests ────────────────────────────────────────────
 
+
 class TestAccountLockout:
     """Account lockout after failed attempts."""
 
@@ -301,6 +305,7 @@ class TestAccountLockout:
 
 
 # ── Token Refresh Tests ──────────────────────────────────────────────
+
 
 class TestTokenRefresh:
     """Refresh token flow."""
@@ -346,6 +351,7 @@ class TestTokenRefresh:
 
 # ── Email Verification Tests ────────────────────────────────────────
 
+
 class TestEmailVerification:
     """Email verification flow."""
 
@@ -370,6 +376,7 @@ class TestEmailVerification:
 
 # ── Logout Tests ─────────────────────────────────────────────────────
 
+
 class TestLogout:
     """Logout and logout-all flows."""
 
@@ -383,10 +390,12 @@ class TestLogout:
 
     def test_logout_all_sessions(self) -> None:
         session_repo = _make_session_repo()
-        session_repo.find_by_field = MagicMock(return_value=[
-            {"session_id": "s1", "revoked": 0},
-            {"session_id": "s2", "revoked": 0},
-        ])
+        session_repo.find_by_field = MagicMock(
+            return_value=[
+                {"session_id": "s1", "revoked": 0},
+                {"session_id": "s2", "revoked": 0},
+            ]
+        )
         svc = AuthService(user_repo=MagicMock(), session_repo=session_repo)
 
         result = svc.logout_all(user_id="uid1")
@@ -395,6 +404,7 @@ class TestLogout:
 
 
 # ── Forgot / Reset Password Tests ───────────────────────────────────
+
 
 class TestPasswordReset:
     """Password reset flow."""

@@ -49,7 +49,9 @@ class TestBaseRepository:
         assert result["email"] == "test@example.com"
 
     def test_find_by_id_returns_none_when_not_found(
-        self, pool: MockPool, cursor: MockCursor,
+        self,
+        pool: MockPool,
+        cursor: MockCursor,
     ) -> None:
         set_mock_query_result(cursor, columns=["user_id"], rows=[])
         repo = self._make_repo(pool)

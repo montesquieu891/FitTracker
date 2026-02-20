@@ -131,6 +131,7 @@ def client(app):  # type: ignore[no-untyped-def]
 
 # ── Helper for setting up mock query results ─────────────────────────
 
+
 def set_mock_query_result(
     cursor: MockCursor,
     columns: list[str],

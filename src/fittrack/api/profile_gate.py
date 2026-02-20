@@ -133,8 +133,7 @@ async def profile_gate_middleware(
             value = profile.get(field)
             if value is None or (isinstance(value, str) and not value.strip()):
                 return _profile_incomplete_response(
-                    "Profile is incomplete. "
-                    "Please complete your profile to access this feature.",
+                    "Profile is incomplete. Please complete your profile to access this feature.",
                 )
 
     except Exception:

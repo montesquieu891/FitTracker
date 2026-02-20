@@ -191,8 +191,7 @@ class TestComputeRankings:
 
     def test_large_leaderboard(self):
         entries = [
-            {"user_id": f"u{i}", "points_earned": i * 10, "active_days": i}
-            for i in range(100)
+            {"user_id": f"u{i}", "points_earned": i * 10, "active_days": i} for i in range(100)
         ]
         ranked = compute_rankings(entries)
         assert len(ranked) == 100
@@ -266,7 +265,7 @@ class MockRepo:
         return [d for d in self.data if d.get("tier_code") == tier_code]
 
     def find_all(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
-        return self.data[offset:offset + limit]
+        return self.data[offset : offset + limit]
 
     def find_by_user_and_date_range(
         self, user_id: str, start: datetime, end: datetime
@@ -290,6 +289,7 @@ class MockCache:
 
     def delete_pattern(self, pattern: str) -> int:
         import fnmatch
+
         keys = [k for k in self._store if fnmatch.fnmatch(k, pattern)]
         for k in keys:
             del self._store[k]
@@ -438,9 +438,7 @@ class TestLeaderboardService:
 
     def test_daily_excludes_old_transactions(self):
         profiles = _make_profiles(1)
-        yesterday_txn = _make_transactions(
-            "u0", 500, datetime.now(tz=UTC) - timedelta(days=2)
-        )
+        yesterday_txn = _make_transactions("u0", 500, datetime.now(tz=UTC) - timedelta(days=2))
         service = self._make_service(profiles=profiles, transactions=yesterday_txn)
         result = service.get_leaderboard("daily", "M-18-29-BEG")
         # Old transaction should not count in daily
@@ -476,8 +474,6 @@ class TestLeaderboardService:
             },
         ]
         txns = _make_transactions("u0", 100, now)
-        service = self._make_service(
-            profiles=profiles, transactions=txns, activities=activities
-        )
+        service = self._make_service(profiles=profiles, transactions=txns, activities=activities)
         result = service.get_leaderboard("weekly", "M-18-29-BEG")
         assert result["items"][0]["active_days"] == 2

@@ -79,18 +79,14 @@ class CacheService:
                 count = 0
                 cursor = 0
                 while True:
-                    cursor, keys = self._redis.scan(
-                        cursor=cursor, match=pattern, count=100
-                    )
+                    cursor, keys = self._redis.scan(cursor=cursor, match=pattern, count=100)
                     if keys:
                         count += self._redis.delete(*keys)
                     if cursor == 0:
                         break
                 return count
             except Exception:
-                logger.warning(
-                    "Cache DELETE_PATTERN failed for %s", pattern, exc_info=True
-                )
+                logger.warning("Cache DELETE_PATTERN failed for %s", pattern, exc_info=True)
                 return 0
 
         # In-memory: simple glob-like matching (only supports trailing *)

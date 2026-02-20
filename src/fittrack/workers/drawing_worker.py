@@ -66,14 +66,10 @@ class DrawingWorker:
 
         return result
 
-    def _close_ticket_sales(
-        self, now: datetime, result: DrawingWorkerResult
-    ) -> None:
+    def _close_ticket_sales(self, now: datetime, result: DrawingWorkerResult) -> None:
         """Auto-close ticket sales for drawings within 5 minutes."""
         try:
-            open_drawings = self.drawing_service.drawing_repo.find_by_field(
-                "status", "open"
-            )
+            open_drawings = self.drawing_service.drawing_repo.find_by_field("status", "open")
         except Exception as e:
             result.errors.append(f"Failed to fetch open drawings: {e}")
             return
@@ -84,26 +80,18 @@ class DrawingWorker:
                 continue
 
             try:
-                should_close = self.drawing_service.check_sales_should_close(
-                    drawing_id, now
-                )
+                should_close = self.drawing_service.check_sales_should_close(drawing_id, now)
                 if should_close:
                     self.drawing_service.close_drawing(drawing_id)
                     result.sales_closed.append(drawing_id)
                     logger.info("Auto-closed ticket sales for %s", drawing_id)
             except Exception as e:
-                result.errors.append(
-                    f"Failed to close sales for {drawing_id}: {e}"
-                )
+                result.errors.append(f"Failed to close sales for {drawing_id}: {e}")
 
-    def _execute_ready_drawings(
-        self, now: datetime, result: DrawingWorkerResult
-    ) -> None:
+    def _execute_ready_drawings(self, now: datetime, result: DrawingWorkerResult) -> None:
         """Auto-execute drawings that are past their drawing_time."""
         try:
-            closed_drawings = self.drawing_service.drawing_repo.find_by_field(
-                "status", "closed"
-            )
+            closed_drawings = self.drawing_service.drawing_repo.find_by_field("status", "closed")
         except Exception as e:
             result.errors.append(f"Failed to fetch closed drawings: {e}")
             return
@@ -114,14 +102,10 @@ class DrawingWorker:
                 continue
 
             try:
-                is_ready = self.drawing_service.check_drawing_ready(
-                    drawing_id, now
-                )
+                is_ready = self.drawing_service.check_drawing_ready(drawing_id, now)
                 if is_ready:
                     self.drawing_executor.execute(drawing_id)
                     result.drawings_executed.append(drawing_id)
                     logger.info("Auto-executed drawing %s", drawing_id)
             except Exception as e:
-                result.errors.append(
-                    f"Failed to execute drawing {drawing_id}: {e}"
-                )
+                result.errors.append(f"Failed to execute drawing {drawing_id}: {e}")

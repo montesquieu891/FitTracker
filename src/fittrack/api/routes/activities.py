@@ -20,6 +20,7 @@ router = APIRouter(prefix="/api/v1/activities", tags=["activities"])
 
 def _get_repo() -> ActivityRepository:
     from fittrack.core.database import get_pool
+
     return ActivityRepository(pool=get_pool())
 
 
@@ -85,6 +86,7 @@ def activity_summary(
         metrics = a.get("metrics", {})
         if isinstance(metrics, str):
             import json
+
             try:
                 metrics = json.loads(metrics)
             except (json.JSONDecodeError, TypeError):
@@ -97,9 +99,7 @@ def activity_summary(
             workout_count += 1
             total_calories += metrics.get("calories_burned", 0)
         elif atype == "active_minutes":
-            total_active_minutes += a.get("duration_minutes", 0) or metrics.get(
-                "active_minutes", 0
-            )
+            total_active_minutes += a.get("duration_minutes", 0) or metrics.get("active_minutes", 0)
 
         total_points += a.get("points_earned", 0)
 

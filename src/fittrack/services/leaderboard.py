@@ -94,6 +94,7 @@ def compute_rankings(
 
     Returns a list with ``rank`` added to each entry, sorted 1..N.
     """
+
     def sort_key(entry: dict[str, Any]) -> tuple[int, Any, int, str]:
         pts = -(entry.get("points_earned", 0) or 0)
 
@@ -163,6 +164,7 @@ def extract_user_context(
             "context": [],
         }
 
+    assert user_entry is not None
     start = max(0, user_idx - window)
     end = min(total, user_idx + window + 1)
     context = rankings[start:end]
@@ -270,7 +272,7 @@ class LeaderboardService:
             return 1 if self.cache.delete(key) else 0
 
         # Invalidate all leaderboard keys
-        return self.cache.delete_pattern("leaderboard:*")
+        return int(self.cache.delete_pattern("leaderboard:*"))
 
     # ── Private helpers ─────────────────────────────────────────────
 
@@ -325,14 +327,16 @@ class LeaderboardService:
             # Count active days in period
             active_days = self._count_active_days(user_id, start, end)
 
-            entries.append({
-                "user_id": user_id,
-                "display_name": profile.get("display_name", ""),
-                "tier_code": profile.get("tier_code", ""),
-                "points_earned": points_earned,
-                "earliest_achievement": earliest_achievement,
-                "active_days": active_days,
-            })
+            entries.append(
+                {
+                    "user_id": user_id,
+                    "display_name": profile.get("display_name", ""),
+                    "tier_code": profile.get("tier_code", ""),
+                    "points_earned": points_earned,
+                    "earliest_achievement": earliest_achievement,
+                    "active_days": active_days,
+                }
+            )
 
         return compute_rankings(entries)
 
@@ -344,9 +348,7 @@ class LeaderboardService:
     ) -> int:
         """Count days with ≥30 minutes of activity in the period."""
         try:
-            activities = self.activity_repo.find_by_user_and_date_range(
-                user_id, start, end
-            )
+            activities = self.activity_repo.find_by_user_and_date_range(user_id, start, end)
         except Exception:
             activities = []
 
@@ -380,7 +382,7 @@ class LeaderboardService:
     ) -> dict[str, Any]:
         total = len(rankings)
         offset = (page - 1) * limit
-        items = rankings[offset:offset + limit]
+        items = rankings[offset : offset + limit]
         total_pages = max(1, (total + limit - 1) // limit)
 
         # Serialize datetimes
@@ -410,7 +412,7 @@ class LeaderboardService:
         """Paginate pre-computed cached rankings."""
         total = len(rankings)
         offset = (page - 1) * limit
-        items = rankings[offset:offset + limit]
+        items = rankings[offset : offset + limit]
         total_pages = max(1, (total + limit - 1) // limit)
         return {
             "items": items,

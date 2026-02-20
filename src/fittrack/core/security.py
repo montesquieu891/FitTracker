@@ -25,20 +25,20 @@ pwd_context = CryptContext(
 
 def hash_password(plain: str) -> str:
     """Hash a plain-text password with Argon2id."""
-    return pwd_context.hash(plain)
+    return str(pwd_context.hash(plain))
 
 
 def verify_password(plain: str, hashed: str) -> bool:
     """Verify a plain-text password against an Argon2id hash."""
     try:
-        return pwd_context.verify(plain, hashed)
+        return bool(pwd_context.verify(plain, hashed))
     except Exception:
         return False
 
 
 def password_needs_rehash(hashed: str) -> bool:
     """Check whether a hash should be upgraded to current parameters."""
-    return pwd_context.needs_update(hashed)
+    return bool(pwd_context.needs_update(hashed))
 
 
 # ── Password Complexity ─────────────────────────────────────────────
@@ -154,7 +154,7 @@ def create_access_token(
     }
     if extra_claims:
         payload.update(extra_claims)
-    return jwt.encode(payload, _get_signing_key(), algorithm=ALGORITHM)
+    return str(jwt.encode(payload, _get_signing_key(), algorithm=ALGORITHM))
 
 
 def create_refresh_token(
@@ -171,13 +171,14 @@ def create_refresh_token(
         "iat": now,
         "exp": now + (expires_days * 86400),
     }
-    return jwt.encode(payload, _get_signing_key(), algorithm=ALGORITHM)
+    return str(jwt.encode(payload, _get_signing_key(), algorithm=ALGORITHM))
 
 
 def decode_token(token: str) -> dict[str, Any]:
     """Decode and verify a JWT token. Raises JWTError on failure."""
     try:
-        return jwt.decode(token, _get_verify_key(), algorithms=[ALGORITHM])
+        payload: dict[str, Any] = jwt.decode(token, _get_verify_key(), algorithms=[ALGORITHM])
+        return payload
     except JWTError:
         raise
 

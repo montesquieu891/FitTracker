@@ -6,17 +6,22 @@ Admin endpoints for managing drawing lifecycle and execution.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from fittrack.api.deps import get_current_user_id, require_admin
 from fittrack.api.schemas.drawings import DrawingCreate, DrawingUpdate
 
+if TYPE_CHECKING:
+    from fittrack.services.drawing_executor import DrawingExecutor
+    from fittrack.services.drawings import DrawingService
+    from fittrack.services.tickets import TicketService
+
 router = APIRouter(prefix="/api/v1/drawings", tags=["drawings"])
 
 
-def _get_drawing_service():  # type: ignore[no-untyped-def]
+def _get_drawing_service() -> DrawingService:
     from fittrack.core.database import get_pool
     from fittrack.repositories.drawing_repository import DrawingRepository
     from fittrack.repositories.prize_repository import PrizeRepository
@@ -31,7 +36,7 @@ def _get_drawing_service():  # type: ignore[no-untyped-def]
     )
 
 
-def _get_ticket_service():  # type: ignore[no-untyped-def]
+def _get_ticket_service() -> TicketService:
     from fittrack.core.database import get_pool
     from fittrack.repositories.drawing_repository import DrawingRepository
     from fittrack.repositories.ticket_repository import TicketRepository
@@ -48,7 +53,7 @@ def _get_ticket_service():  # type: ignore[no-untyped-def]
     )
 
 
-def _get_executor():  # type: ignore[no-untyped-def]
+def _get_executor() -> DrawingExecutor:
     from fittrack.core.database import get_pool
     from fittrack.repositories.drawing_repository import DrawingRepository
     from fittrack.repositories.fulfillment_repository import FulfillmentRepository
@@ -122,9 +127,7 @@ def purchase_tickets(
 
     service = _get_ticket_service()
     try:
-        return service.purchase_tickets(
-            user_id=user_id, drawing_id=drawing_id, quantity=quantity
-        )
+        return service.purchase_tickets(user_id=user_id, drawing_id=drawing_id, quantity=quantity)
     except TicketError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail) from e
 

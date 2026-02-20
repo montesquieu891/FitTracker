@@ -19,9 +19,7 @@ def _patch_auth_repos():
 
     mock_session_repo = MagicMock()
     mock_session_repo.create = MagicMock()
-    mock_session_repo.find_by_id = MagicMock(
-        return_value={"session_id": "s1", "revoked": 0}
-    )
+    mock_session_repo.find_by_id = MagicMock(return_value={"session_id": "s1", "revoked": 0})
     mock_session_repo.find_by_field = MagicMock(return_value=[])
     mock_session_repo.update = MagicMock(return_value=1)
 
@@ -51,52 +49,67 @@ class TestRegisterRoute:
     """POST /api/v1/auth/register."""
 
     def test_register_success(self, auth_client: TestClient) -> None:
-        resp = auth_client.post("/api/v1/auth/register", json={
-            "email": "new@example.com",
-            "password": "Str0ng!Pass",
-            "date_of_birth": "1990-01-15",
-            "state": "TX",
-        })
+        resp = auth_client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "new@example.com",
+                "password": "Str0ng!Pass",
+                "date_of_birth": "1990-01-15",
+                "state": "TX",
+            },
+        )
         assert resp.status_code == 201
         data = resp.json()
         assert "access_token" in data
         assert "refresh_token" in data
 
     def test_register_weak_password(self, auth_client: TestClient) -> None:
-        resp = auth_client.post("/api/v1/auth/register", json={
-            "email": "new@example.com",
-            "password": "weak",
-            "date_of_birth": "1990-01-15",
-            "state": "TX",
-        })
+        resp = auth_client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "new@example.com",
+                "password": "weak",
+                "date_of_birth": "1990-01-15",
+                "state": "TX",
+            },
+        )
         # Pydantic validation: min_length=8
         assert resp.status_code == 422
 
     def test_register_invalid_email(self, auth_client: TestClient) -> None:
-        resp = auth_client.post("/api/v1/auth/register", json={
-            "email": "not-an-email",
-            "password": "Str0ng!Pass",
-            "date_of_birth": "1990-01-15",
-            "state": "TX",
-        })
+        resp = auth_client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "not-an-email",
+                "password": "Str0ng!Pass",
+                "date_of_birth": "1990-01-15",
+                "state": "TX",
+            },
+        )
         assert resp.status_code == 422
 
     def test_register_bad_dob_format(self, auth_client: TestClient) -> None:
-        resp = auth_client.post("/api/v1/auth/register", json={
-            "email": "x@y.com",
-            "password": "Str0ng!Pass",
-            "date_of_birth": "01/15/1990",
-            "state": "TX",
-        })
+        resp = auth_client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "x@y.com",
+                "password": "Str0ng!Pass",
+                "date_of_birth": "01/15/1990",
+                "state": "TX",
+            },
+        )
         assert resp.status_code == 422
 
     def test_register_bad_state(self, auth_client: TestClient) -> None:
-        resp = auth_client.post("/api/v1/auth/register", json={
-            "email": "x@y.com",
-            "password": "Str0ng!Pass",
-            "date_of_birth": "1990-01-15",
-            "state": "NY",
-        })
+        resp = auth_client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "x@y.com",
+                "password": "Str0ng!Pass",
+                "date_of_birth": "1990-01-15",
+                "state": "NY",
+            },
+        )
         assert resp.status_code == 403
 
 
@@ -104,16 +117,22 @@ class TestLoginRoute:
     """POST /api/v1/auth/login."""
 
     def test_login_no_user(self, auth_client: TestClient) -> None:
-        resp = auth_client.post("/api/v1/auth/login", json={
-            "email": "nobody@example.com",
-            "password": "Str0ng!Pass",
-        })
+        resp = auth_client.post(
+            "/api/v1/auth/login",
+            json={
+                "email": "nobody@example.com",
+                "password": "Str0ng!Pass",
+            },
+        )
         assert resp.status_code == 401
 
     def test_login_missing_fields(self, auth_client: TestClient) -> None:
-        resp = auth_client.post("/api/v1/auth/login", json={
-            "email": "a@b.com",
-        })
+        resp = auth_client.post(
+            "/api/v1/auth/login",
+            json={
+                "email": "a@b.com",
+            },
+        )
         assert resp.status_code == 422
 
 
@@ -147,13 +166,15 @@ class TestProtectedRoutes:
         from fittrack.core.security import create_access_token
 
         svc, user_repo, _ = _patch_auth_repos
-        user_repo.find_by_id = MagicMock(return_value={
-            "user_id": "uid1",
-            "email": "test@example.com",
-            "status": "active",
-            "role": "user",
-            "password_hash": "HIDDEN",
-        })
+        user_repo.find_by_id = MagicMock(
+            return_value={
+                "user_id": "uid1",
+                "email": "test@example.com",
+                "status": "active",
+                "role": "user",
+                "password_hash": "HIDDEN",
+            }
+        )
 
         token = create_access_token(subject="uid1", role="user")
         resp = auth_client.get(
@@ -183,9 +204,12 @@ class TestRefreshRoute:
         assert resp.status_code == 422
 
     def test_refresh_invalid_token(self, auth_client: TestClient) -> None:
-        resp = auth_client.post("/api/v1/auth/refresh", json={
-            "refresh_token": "invalid.token.here",
-        })
+        resp = auth_client.post(
+            "/api/v1/auth/refresh",
+            json={
+                "refresh_token": "invalid.token.here",
+            },
+        )
         assert resp.status_code == 401
 
 
@@ -193,9 +217,12 @@ class TestForgotPasswordRoute:
     """POST /api/v1/auth/forgot-password."""
 
     def test_forgot_password(self, auth_client: TestClient) -> None:
-        resp = auth_client.post("/api/v1/auth/forgot-password", json={
-            "email": "test@example.com",
-        })
+        resp = auth_client.post(
+            "/api/v1/auth/forgot-password",
+            json={
+                "email": "test@example.com",
+            },
+        )
         assert resp.status_code == 200
         assert "reset_token" in resp.json()
 

@@ -6,16 +6,19 @@ All endpoints require admin role.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from fittrack.api.deps import require_admin
 
+if TYPE_CHECKING:
+    from fittrack.services.admin_users import AdminUserService
+
 router = APIRouter(prefix="/api/v1/admin/users", tags=["admin-users"])
 
 
-def _get_service():
+def _get_service() -> AdminUserService:
     """Build AdminUserService with real repositories."""
     from fittrack.core.database import get_pool
     from fittrack.repositories.admin_action_log_repository import (
@@ -134,6 +137,4 @@ def get_user_actions(
 ) -> dict[str, Any]:
     """Get admin action log for a specific user (admin only)."""
     svc = _get_service()
-    return svc.get_action_log(
-        target_user_id=user_id, page=page, limit=limit
-    )
+    return svc.get_action_log(target_user_id=user_id, page=page, limit=limit)

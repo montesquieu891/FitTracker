@@ -35,15 +35,15 @@ class ActivityRepository(BaseRepository):
                     "AND start_time < :end_date "
                     "ORDER BY start_time"
                 )
-                cur.execute(sql, {
-                    "user_id": user_id,
-                    "start_date": start_date,
-                    "end_date": end_date,
-                })
+                cur.execute(
+                    sql,
+                    {
+                        "user_id": user_id,
+                        "start_date": start_date,
+                        "end_date": end_date,
+                    },
+                )
                 columns = [col[0].lower() for col in (cur.description or [])]
-                return [
-                    dict(zip(columns, row, strict=True))
-                    for row in cur.fetchall()
-                ]
+                return [dict(zip(columns, row, strict=True)) for row in cur.fetchall()]
         finally:
             conn.close()

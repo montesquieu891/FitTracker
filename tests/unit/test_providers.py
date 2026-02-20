@@ -53,13 +53,24 @@ class TestBaseProvider:
 
     def test_validate_token_default(self):
         """Default validate_token returns True."""
+
         class DummyProvider(BaseProvider):
             provider_name = "dummy"
-            def get_authorization_url(self, state, redirect_uri): return ""
-            def exchange_code(self, code, redirect_uri): return TokenInfo(access_token="")
-            def refresh_access_token(self, refresh_token): return TokenInfo(access_token="")
-            def revoke_token(self, token): return True
-            def fetch_activities(self, access_token, start_time, end_time): return []
+
+            def get_authorization_url(self, state, redirect_uri):
+                return ""
+
+            def exchange_code(self, code, redirect_uri):
+                return TokenInfo(access_token="")
+
+            def refresh_access_token(self, refresh_token):
+                return TokenInfo(access_token="")
+
+            def revoke_token(self, token):
+                return True
+
+            def fetch_activities(self, access_token, start_time, end_time):
+                return []
 
         p = DummyProvider()
         assert p.validate_token("any") is True

@@ -152,8 +152,7 @@ class NotificationService:
         """
         if notification_type not in NOTIFICATION_TYPES:
             raise NotificationError(
-                f"Invalid type: {notification_type}. "
-                f"Valid: {NOTIFICATION_TYPES}",
+                f"Invalid type: {notification_type}. Valid: {NOTIFICATION_TYPES}",
                 400,
             )
 
@@ -182,9 +181,7 @@ class NotificationService:
                 subject=title,
                 body=message,
             )
-            self.notification_repo.update(
-                notification_id, data={"email_sent": 1}
-            )
+            self.notification_repo.update(notification_id, data={"email_sent": 1})
             result["email_sent"] = 1
 
         logger.info(
@@ -247,10 +244,7 @@ class NotificationService:
             title = template["subject"]
         else:
             title = f"Prize fulfillment update: {status}"
-            body = (
-                f"Your prize fulfillment status has been updated "
-                f"to: {status}"
-            )
+            body = f"Your prize fulfillment status has been updated to: {status}"
 
         return self.create_notification(
             user_id=user_id,
@@ -273,9 +267,7 @@ class NotificationService:
         """Notify user of account status change."""
         if new_status == "suspended":
             template = EMAIL_TEMPLATES["account_suspended"]
-            body = template["body"].format(
-                display_name=display_name, reason=reason or "N/A"
-            )
+            body = template["body"].format(display_name=display_name, reason=reason or "N/A")
             title = template["subject"]
         elif new_status == "active":
             template = EMAIL_TEMPLATES["account_activated"]
@@ -283,10 +275,7 @@ class NotificationService:
             title = template["subject"]
         else:
             title = f"Account status update: {new_status}"
-            body = (
-                f"Your account status has been changed to: "
-                f"{new_status}"
-            )
+            body = f"Your account status has been changed to: {new_status}"
 
         return self.create_notification(
             user_id=user_id,
@@ -348,9 +337,7 @@ class NotificationService:
             filters["is_read"] = 1 if is_read else 0
 
         offset = (page - 1) * limit
-        items = self.notification_repo.find_all(
-            limit=limit, offset=offset, filters=filters
-        )
+        items = self.notification_repo.find_all(limit=limit, offset=offset, filters=filters)
         total = self.notification_repo.count(filters=filters)
         total_pages = max(1, (total + limit - 1) // limit)
 
@@ -371,17 +358,13 @@ class NotificationService:
             raise NotificationError("Notification not found", 404)
 
         if notification.get("user_id") != user_id:
-            raise NotificationError(
-                "Not authorized to access this notification", 403
-            )
+            raise NotificationError("Not authorized to access this notification", 403)
 
         if notification.get("is_read") == 1:
             return {"notification_id": notification_id, "already_read": True}
 
         now = datetime.now(tz=UTC).isoformat()
-        self.notification_repo.update(
-            notification_id, data={"is_read": 1, "read_at": now}
-        )
+        self.notification_repo.update(notification_id, data={"is_read": 1, "read_at": now})
 
         return {
             "notification_id": notification_id,
@@ -391,18 +374,15 @@ class NotificationService:
 
     def get_unread_count(self, user_id: str) -> int:
         """Get the count of unread notifications for a user."""
-        return self.notification_repo.count(
-            filters={"user_id": user_id, "is_read": 0}
-        )
+        return int(self.notification_repo.count(filters={"user_id": user_id, "is_read": 0}))
 
-    def get_notification(
-        self, notification_id: str
-    ) -> dict[str, Any]:
+    def get_notification(self, notification_id: str) -> dict[str, Any]:
         """Get a single notification by ID."""
         notification = self.notification_repo.find_by_id(notification_id)
         if not notification:
             raise NotificationError("Notification not found", 404)
-        return notification
+        result: dict[str, Any] = notification
+        return result
 
     # ── Email Dispatch ───────────────────────────────────────────
 
@@ -414,9 +394,7 @@ class NotificationService:
     ) -> None:
         """Dispatch email (console in dev, real provider in prod)."""
         if self.email_service:
-            self.email_service._send(
-                to=to, subject=subject, body=body
-            )
+            self.email_service._send(to=to, subject=subject, body=body)
         elif self.dev_mode:
             logger.info(
                 "[DEV EMAIL] To: %s | Subject: %s | Body: %s",
@@ -427,14 +405,11 @@ class NotificationService:
         # Silently skip if no email service configured
 
     @staticmethod
-    def render_template(
-        template_key: str, **kwargs: Any
-    ) -> dict[str, str]:
+    def render_template(template_key: str, **kwargs: Any) -> dict[str, str]:
         """Render an email template with the given variables."""
         if template_key not in EMAIL_TEMPLATES:
             raise NotificationError(
-                f"Unknown template: {template_key}. "
-                f"Valid: {list(EMAIL_TEMPLATES.keys())}",
+                f"Unknown template: {template_key}. Valid: {list(EMAIL_TEMPLATES.keys())}",
                 400,
             )
         template = EMAIL_TEMPLATES[template_key]
@@ -442,7 +417,5 @@ class NotificationService:
             subject = template["subject"].format(**kwargs)
             body = template["body"].format(**kwargs)
         except KeyError as e:
-            raise NotificationError(
-                f"Missing template variable: {e}", 400
-            ) from e
+            raise NotificationError(f"Missing template variable: {e}", 400) from e
         return {"subject": subject, "body": body}

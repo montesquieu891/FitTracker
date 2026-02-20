@@ -192,9 +192,7 @@ class TestLeaderboardRoutes:
             "total_participants": 50,
             "period": "daily",
             "tier_code": "M-18-29-BEG",
-            "context": [
-                {"user_id": f"u{i}", "rank": i} for i in range(1, 11)
-            ],
+            "context": [{"user_id": f"u{i}", "rank": i} for i in range(1, 11)],
         }
         mock_svc_factory.return_value = mock_svc
 

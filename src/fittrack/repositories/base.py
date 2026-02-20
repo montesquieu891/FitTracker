@@ -9,6 +9,7 @@ from typing import Any
 
 try:
     import oracledb
+
     _HAS_ORACLEDB = True
 except ImportError:  # pragma: no cover – unit tests run without oracledb
     _HAS_ORACLEDB = False
@@ -46,7 +47,9 @@ class BaseRepository:
         """Log query timing; warn if above slow-query threshold."""
         if elapsed_ms > SLOW_QUERY_THRESHOLD_MS:
             logger.warning(
-                "SLOW QUERY (%.1fms): %s", elapsed_ms, sql[:200],
+                "SLOW QUERY (%.1fms): %s",
+                elapsed_ms,
+                sql[:200],
             )
         else:
             logger.debug("Query (%.1fms): %s", elapsed_ms, sql[:200])
@@ -242,7 +245,7 @@ class BaseRepository:
                 cur.execute(sql, params)
                 conn.commit()
                 self._log_query(sql, (time.perf_counter() - start) * 1000)
-                return cur.rowcount
+                return int(cur.rowcount)
         finally:
             conn.close()
 
@@ -257,6 +260,6 @@ class BaseRepository:
                 cur.execute(sql, {"id": self._to_raw_id(entity_id)})
                 conn.commit()
                 self._log_query(sql, (time.perf_counter() - start) * 1000)
-                return cur.rowcount
+                return int(cur.rowcount)
         finally:
             conn.close()

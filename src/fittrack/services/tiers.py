@@ -54,10 +54,7 @@ def compute_tier_code(
         raise ValueError(msg)
 
     if age_bracket not in AGE_BRACKETS:
-        msg = (
-            f"Invalid age_bracket: {age_bracket!r}. "
-            f"Must be one of: {AGE_BRACKETS}"
-        )
+        msg = f"Invalid age_bracket: {age_bracket!r}. Must be one of: {AGE_BRACKETS}"
         raise ValueError(msg)
 
     fl_code = FITNESS_LEVEL_TO_CODE.get(fitness_level)
@@ -111,7 +108,8 @@ def get_tier_display_name(tier_code: str) -> str:
     parts = parse_tier_code(tier_code)
     sex_name = SEX_CATEGORY_NAMES.get(parts["sex"], parts["sex"])
     fl_name = FITNESS_LEVEL_NAMES.get(
-        parts["fitness_level"], parts["fitness_level"],
+        parts["fitness_level"],
+        parts["fitness_level"],
     )
     return f"{sex_name} · {parts['age_bracket']} · {fl_name}"
 
@@ -127,15 +125,17 @@ def enumerate_tiers() -> list[dict[str, str]]:
         for age in AGE_BRACKETS:
             for level in FITNESS_LEVELS:
                 code = f"{sex}-{age}-{level}"
-                tiers.append({
-                    "tier_code": code,
-                    "display_name": get_tier_display_name(code),
-                    "sex": sex,
-                    "sex_name": SEX_CATEGORY_NAMES[sex],
-                    "age_bracket": age,
-                    "fitness_level": level,
-                    "fitness_level_name": FITNESS_LEVEL_NAMES[level],
-                })
+                tiers.append(
+                    {
+                        "tier_code": code,
+                        "display_name": get_tier_display_name(code),
+                        "sex": sex,
+                        "sex_name": SEX_CATEGORY_NAMES[sex],
+                        "age_bracket": age,
+                        "fitness_level": level,
+                        "fitness_level_name": FITNESS_LEVEL_NAMES[level],
+                    }
+                )
     return tiers
 
 

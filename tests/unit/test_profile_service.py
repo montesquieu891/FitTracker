@@ -184,7 +184,9 @@ class TestUpdateProfile:
         assert result["updated"] is True
 
     def test_update_recomputes_tier_on_sex_change(
-        self, svc: ProfileService, profile_repo: FakeProfileRepo,
+        self,
+        svc: ProfileService,
+        profile_repo: FakeProfileRepo,
     ) -> None:
         pid = self._seed(svc)
         svc.update_profile(pid, {"biological_sex": "male"})
@@ -193,7 +195,9 @@ class TestUpdateProfile:
         assert updated["tier_code"] == "M-30-39-INT"
 
     def test_update_recomputes_tier_on_age_change(
-        self, svc: ProfileService, profile_repo: FakeProfileRepo,
+        self,
+        svc: ProfileService,
+        profile_repo: FakeProfileRepo,
     ) -> None:
         pid = self._seed(svc)
         svc.update_profile(pid, {"age_bracket": "40-49"})
@@ -202,7 +206,9 @@ class TestUpdateProfile:
         assert updated["tier_code"] == "F-40-49-INT"
 
     def test_update_recomputes_tier_on_fitness_change(
-        self, svc: ProfileService, profile_repo: FakeProfileRepo,
+        self,
+        svc: ProfileService,
+        profile_repo: FakeProfileRepo,
     ) -> None:
         pid = self._seed(svc)
         svc.update_profile(pid, {"fitness_level": "advanced"})
@@ -229,7 +235,9 @@ class TestUpdateProfile:
         pid = self._seed(svc)
         with pytest.raises(ProfileError, match="another user") as exc_info:
             svc.update_profile(
-                pid, {"display_name": "Hacked"}, user_id="u2",
+                pid,
+                {"display_name": "Hacked"},
+                user_id="u2",
             )
         assert exc_info.value.status_code == 403
 
@@ -246,7 +254,9 @@ class TestProfileCompletion:
 
     @pytest.mark.parametrize("field", REQUIRED_PROFILE_FIELDS)
     def test_missing_field_is_incomplete(
-        self, svc: ProfileService, field: str,
+        self,
+        svc: ProfileService,
+        field: str,
     ) -> None:
         profile = _complete_profile_data()
         del profile[field]
@@ -254,7 +264,9 @@ class TestProfileCompletion:
 
     @pytest.mark.parametrize("field", REQUIRED_PROFILE_FIELDS)
     def test_none_field_is_incomplete(
-        self, svc: ProfileService, field: str,
+        self,
+        svc: ProfileService,
+        field: str,
     ) -> None:
         profile = _complete_profile_data()
         profile[field] = None
@@ -306,7 +318,8 @@ class TestGetUserWithProfile:
         assert exc_info.value.status_code == 404
 
     def test_no_user_repo_raises(
-        self, profile_repo: FakeProfileRepo,
+        self,
+        profile_repo: FakeProfileRepo,
     ) -> None:
         svc = ProfileService(profile_repo=profile_repo)
         with pytest.raises(ProfileError, match="not configured"):
@@ -323,14 +336,18 @@ class TestGetPublicProfile:
         svc.create_profile("u1", _complete_profile_data())
         result = svc.get_public_profile("u1")
         assert set(result.keys()) == {
-            "user_id", "display_name", "tier_code",
-            "fitness_level", "age_bracket",
+            "user_id",
+            "display_name",
+            "tier_code",
+            "fitness_level",
+            "age_bracket",
         }
         assert result["user_id"] == "u1"
         assert result["display_name"] == "Jane Doe"
 
     def test_public_profile_nonexistent_raises_404(
-        self, svc: ProfileService,
+        self,
+        svc: ProfileService,
     ) -> None:
         with pytest.raises(ProfileError, match="not found") as exc_info:
             svc.get_public_profile("nobody")

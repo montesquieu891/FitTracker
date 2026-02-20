@@ -67,33 +67,31 @@ class MockFulfillmentRepo:
 # ── Factory ─────────────────────────────────────────────────────────
 
 
-def _make_tickets(
-    drawing_id: str, user_ids: list[str], per_user: int = 1
-) -> list[dict[str, Any]]:
+def _make_tickets(drawing_id: str, user_ids: list[str], per_user: int = 1) -> list[dict[str, Any]]:
     """Create tickets for given users."""
     tickets = []
     idx = 0
     for uid in user_ids:
         for _ in range(per_user):
             idx += 1
-            tickets.append({
-                "ticket_id": f"t{idx:04d}",
-                "drawing_id": drawing_id,
-                "user_id": uid,
-                "is_winner": 0,
-            })
+            tickets.append(
+                {
+                    "ticket_id": f"t{idx:04d}",
+                    "drawing_id": drawing_id,
+                    "user_id": uid,
+                    "is_winner": 0,
+                }
+            )
     return tickets
 
 
-def _make_prizes(
-    drawing_id: str, count: int = 1, quantity: int = 1
-) -> list[dict[str, Any]]:
+def _make_prizes(drawing_id: str, count: int = 1, quantity: int = 1) -> list[dict[str, Any]]:
     """Create prizes for a drawing."""
     return [
         {
-            "prize_id": f"p{i+1}",
+            "prize_id": f"p{i + 1}",
             "drawing_id": drawing_id,
-            "name": f"Prize {i+1}",
+            "name": f"Prize {i + 1}",
             "rank": i + 1,
             "quantity": quantity,
         }
@@ -196,9 +194,7 @@ class TestWinnerSelection:
     def test_single_winner(self):
         tickets = _make_tickets("d1", ["u1", "u2", "u3"], per_user=2)
         prizes = _make_prizes("d1", count=1)
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         assert len(result["winners"]) == 1
         assert result["winners"][0]["user_id"] in {"u1", "u2", "u3"}
@@ -206,9 +202,7 @@ class TestWinnerSelection:
     def test_multiple_prizes(self):
         tickets = _make_tickets("d1", [f"u{i}" for i in range(10)], per_user=2)
         prizes = _make_prizes("d1", count=3)
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         assert len(result["winners"]) == 3
 
@@ -217,9 +211,7 @@ class TestWinnerSelection:
         # 3 users with many tickets each
         tickets = _make_tickets("d1", ["u1", "u2", "u3"], per_user=10)
         prizes = _make_prizes("d1", count=3)
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         winner_ids = [w["user_id"] for w in result["winners"]]
         # All three different users should win
@@ -229,9 +221,7 @@ class TestWinnerSelection:
         """If more prizes than unique users, some prizes go unawarded."""
         tickets = _make_tickets("d1", ["u1", "u2"], per_user=5)
         prizes = _make_prizes("d1", count=5)  # 5 prizes but only 2 users
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         # At most 2 winners (one per user)
         assert len(result["winners"]) <= 2
@@ -240,9 +230,7 @@ class TestWinnerSelection:
         """One user with many tickets wins the single prize."""
         tickets = _make_tickets("d1", ["u1"], per_user=10)
         prizes = _make_prizes("d1", count=1)
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         assert len(result["winners"]) == 1
         assert result["winners"][0]["user_id"] == "u1"
@@ -255,9 +243,7 @@ class TestAuditTrail:
     def test_result_has_seed_hash(self):
         tickets = _make_tickets("d1", ["u1", "u2"])
         prizes = _make_prizes("d1")
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         assert result["random_seed_hash"]
         assert len(result["random_seed_hash"]) == 64  # SHA-256 hex
@@ -265,36 +251,28 @@ class TestAuditTrail:
     def test_result_has_algorithm(self):
         tickets = _make_tickets("d1", ["u1", "u2"])
         prizes = _make_prizes("d1")
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         assert result["algorithm"] == "secrets.randbelow"
 
     def test_result_has_total_tickets(self):
         tickets = _make_tickets("d1", ["u1", "u2", "u3"], per_user=2)
         prizes = _make_prizes("d1")
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         assert result["total_tickets"] == 6
 
     def test_result_has_executed_at(self):
         tickets = _make_tickets("d1", ["u1"])
         prizes = _make_prizes("d1")
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         assert result["executed_at"]
 
     def test_drawing_marked_completed(self):
         tickets = _make_tickets("d1", ["u1"])
         prizes = _make_prizes("d1")
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         executor.execute("d1")
         drawing = executor.drawing_repo.find_by_id("d1")
         assert drawing["status"] == "completed"
@@ -304,9 +282,7 @@ class TestAuditTrail:
     def test_seed_hash_is_sha256(self):
         tickets = _make_tickets("d1", ["u1"])
         prizes = _make_prizes("d1")
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         # Verify it's valid hex
         int(result["random_seed_hash"], 16)
@@ -319,9 +295,7 @@ class TestFulfillmentCreation:
     def test_fulfillments_created_for_winners(self):
         tickets = _make_tickets("d1", ["u1", "u2", "u3"], per_user=3)
         prizes = _make_prizes("d1", count=2)
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         assert len(result["fulfillments"]) == 2
         for f in result["fulfillments"]:
@@ -332,9 +306,7 @@ class TestFulfillmentCreation:
     def test_fulfillment_records_in_repo(self):
         tickets = _make_tickets("d1", ["u1", "u2"])
         prizes = _make_prizes("d1", count=1)
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         executor.execute("d1")
         stored = executor.fulfillment_repo._store
         assert len(stored) == 1
@@ -342,9 +314,7 @@ class TestFulfillmentCreation:
     def test_fulfillment_links_user_and_prize(self):
         tickets = _make_tickets("d1", ["u1", "u2"])
         prizes = _make_prizes("d1", count=1)
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         f = result["fulfillments"][0]
         assert f["user_id"] in {"u1", "u2"}
@@ -358,41 +328,26 @@ class TestTicketMarking:
     def test_winning_tickets_marked(self):
         tickets = _make_tickets("d1", ["u1", "u2"], per_user=3)
         prizes = _make_prizes("d1", count=1)
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         executor.execute("d1")
         # Check ticket store for winner marks
-        winning = [
-            t for t in executor.ticket_repo._store.values()
-            if t.get("is_winner") == 1
-        ]
+        winning = [t for t in executor.ticket_repo._store.values() if t.get("is_winner") == 1]
         assert len(winning) == 1
 
     def test_winner_has_prize_id(self):
         tickets = _make_tickets("d1", ["u1", "u2"])
         prizes = _make_prizes("d1", count=1)
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         executor.execute("d1")
-        winning = [
-            t for t in executor.ticket_repo._store.values()
-            if t.get("is_winner") == 1
-        ]
+        winning = [t for t in executor.ticket_repo._store.values() if t.get("is_winner") == 1]
         assert winning[0]["prize_id"] == "p1"
 
     def test_winner_has_ticket_number(self):
         tickets = _make_tickets("d1", ["u1", "u2"])
         prizes = _make_prizes("d1", count=1)
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         executor.execute("d1")
-        winning = [
-            t for t in executor.ticket_repo._store.values()
-            if t.get("is_winner") == 1
-        ]
+        winning = [t for t in executor.ticket_repo._store.values() if t.get("is_winner") == 1]
         assert winning[0].get("ticket_number") is not None
         assert winning[0]["ticket_number"] >= 1
 
@@ -405,12 +360,8 @@ class TestPrizeQuantity:
         """A single prize with quantity=3 gives 3 winners."""
         users = [f"u{i}" for i in range(10)]
         tickets = _make_tickets("d1", users, per_user=2)
-        prizes = [
-            {"prize_id": "p1", "drawing_id": "d1", "name": "Prize", "rank": 1, "quantity": 3}
-        ]
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        prizes = [{"prize_id": "p1", "drawing_id": "d1", "name": "Prize", "rank": 1, "quantity": 3}]
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         assert len(result["winners"]) == 3
         # All unique users
@@ -419,11 +370,7 @@ class TestPrizeQuantity:
     def test_quantity_exceeds_users(self):
         """If prize quantity exceeds unique users, award what we can."""
         tickets = _make_tickets("d1", ["u1", "u2"], per_user=5)
-        prizes = [
-            {"prize_id": "p1", "drawing_id": "d1", "name": "Prize", "rank": 1, "quantity": 5}
-        ]
-        executor = _make_executor(
-            drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes
-        )
+        prizes = [{"prize_id": "p1", "drawing_id": "d1", "name": "Prize", "rank": 1, "quantity": 5}]
+        executor = _make_executor(drawing=_CLOSED_DRAW, tickets=tickets, prizes=prizes)
         result = executor.execute("d1")
         assert len(result["winners"]) <= 2

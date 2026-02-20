@@ -159,9 +159,7 @@ class TestPurchaseSuccess:
     def test_single_ticket(self):
         svc = _make_service(balance=500)
         now = datetime(2026, 3, 1, 17, 0, tzinfo=UTC)
-        result = svc.purchase_tickets(
-            user_id="u1", drawing_id="d1", quantity=1, now=now
-        )
+        result = svc.purchase_tickets(user_id="u1", drawing_id="d1", quantity=1, now=now)
         assert result["quantity"] == 1
         assert result["total_cost"] == 100
         assert result["ticket_cost"] == 100
@@ -171,9 +169,7 @@ class TestPurchaseSuccess:
     def test_bulk_purchase_5_tickets(self):
         svc = _make_service(balance=1000)
         now = datetime(2026, 3, 1, 17, 0, tzinfo=UTC)
-        result = svc.purchase_tickets(
-            user_id="u1", drawing_id="d1", quantity=5, now=now
-        )
+        result = svc.purchase_tickets(user_id="u1", drawing_id="d1", quantity=5, now=now)
         assert result["quantity"] == 5
         assert result["total_cost"] == 500
         assert result["new_balance"] == 500
@@ -182,9 +178,7 @@ class TestPurchaseSuccess:
     def test_purchase_creates_transaction(self):
         svc = _make_service(balance=500)
         now = datetime(2026, 3, 1, 17, 0, tzinfo=UTC)
-        result = svc.purchase_tickets(
-            user_id="u1", drawing_id="d1", quantity=1, now=now
-        )
+        result = svc.purchase_tickets(user_id="u1", drawing_id="d1", quantity=1, now=now)
         assert result["purchase_id"]  # transaction ID
         txns = svc.transaction_repo._store
         assert len(txns) == 1
@@ -209,18 +203,14 @@ class TestPurchaseSuccess:
     def test_purchase_exact_balance(self):
         svc = _make_service(balance=100)
         now = datetime(2026, 3, 1, 17, 0, tzinfo=UTC)
-        result = svc.purchase_tickets(
-            user_id="u1", drawing_id="d1", quantity=1, now=now
-        )
+        result = svc.purchase_tickets(user_id="u1", drawing_id="d1", quantity=1, now=now)
         assert result["new_balance"] == 0
 
     def test_custom_ticket_cost(self):
         draw = {**_OPEN_DRAW, "ticket_cost_points": 250}
         svc = _make_service(drawings=[draw], balance=1000)
         now = datetime(2026, 3, 1, 17, 0, tzinfo=UTC)
-        result = svc.purchase_tickets(
-            user_id="u1", drawing_id="d1", quantity=2, now=now
-        )
+        result = svc.purchase_tickets(user_id="u1", drawing_id="d1", quantity=2, now=now)
         assert result["total_cost"] == 500
 
 
@@ -277,9 +267,7 @@ class TestTicketEdgeCases:
         draw = {**_OPEN_DRAW, "ticket_sales_close": close_time.isoformat()}
         svc = _make_service(drawings=[draw], balance=500)
         with pytest.raises(TicketError, match="sales have closed"):
-            svc.purchase_tickets(
-                user_id="u1", drawing_id="d1", now=close_time
-            )
+            svc.purchase_tickets(user_id="u1", drawing_id="d1", now=close_time)
 
     def test_sales_window_just_before_deadline(self):
         """Sales still open 1 second before deadline."""
@@ -287,9 +275,7 @@ class TestTicketEdgeCases:
         draw = {**_OPEN_DRAW, "ticket_sales_close": close_time.isoformat()}
         svc = _make_service(drawings=[draw], balance=500)
         just_before = close_time - timedelta(seconds=1)
-        result = svc.purchase_tickets(
-            user_id="u1", drawing_id="d1", now=just_before
-        )
+        result = svc.purchase_tickets(user_id="u1", drawing_id="d1", now=just_before)
         assert result["quantity"] == 1
 
     def test_fallback_balance_sum(self):
@@ -310,9 +296,7 @@ class TestTicketEdgeCases:
     def test_ticket_data_structure(self):
         svc = _make_service(balance=500)
         now = datetime(2026, 3, 1, 17, 0, tzinfo=UTC)
-        result = svc.purchase_tickets(
-            user_id="u1", drawing_id="d1", quantity=1, now=now
-        )
+        result = svc.purchase_tickets(user_id="u1", drawing_id="d1", quantity=1, now=now)
         ticket = result["tickets"][0]
         assert ticket["drawing_id"] == "d1"
         assert ticket["user_id"] == "u1"

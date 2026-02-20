@@ -111,6 +111,7 @@ class AntiGamingService:
         metrics = activity.get("metrics", {})
         if isinstance(metrics, str):
             import json
+
             try:
                 metrics = json.loads(metrics)
             except (json.JSONDecodeError, TypeError):
@@ -137,12 +138,9 @@ class AntiGamingService:
         if is_anomaly:
             result["recommended_action"] = "review"
             result["reason"] = (
-                f"{activity_type} value {value} is {z_score:.1f} std devs "
-                f"from tier avg {avg}"
+                f"{activity_type} value {value} is {z_score:.1f} std devs from tier avg {avg}"
             )
-            logger.warning(
-                "Anomaly detected for user %s: %s", user_id, result["reason"]
-            )
+            logger.warning("Anomaly detected for user %s: %s", user_id, result["reason"])
 
         return result
 
@@ -254,9 +252,7 @@ class AntiGamingService:
 
     def _get_today_earned(self, user_id: str) -> int:
         """Sum of points earned today from transactions."""
-        today_start = datetime.now(tz=UTC).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
+        today_start = datetime.now(tz=UTC).replace(hour=0, minute=0, second=0, microsecond=0)
         today_end = today_start + timedelta(days=1)
 
         all_txns = self.transaction_repo.find_by_user_id(user_id)
@@ -280,9 +276,7 @@ class AntiGamingService:
 
     def _count_today_workouts(self, user_id: str) -> int:
         """Count workout bonuses already awarded today."""
-        today_start = datetime.now(tz=UTC).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
+        today_start = datetime.now(tz=UTC).replace(hour=0, minute=0, second=0, microsecond=0)
         today_end = today_start + timedelta(days=1)
 
         try:
@@ -312,10 +306,7 @@ class AntiGamingService:
         if activity_type == "workout":
             return float(activity.get("duration_minutes", 0) or 0)
         if activity_type == "active_minutes":
-            return float(
-                activity.get("duration_minutes", 0)
-                or metrics.get("active_minutes", 0)
-            )
+            return float(activity.get("duration_minutes", 0) or metrics.get("active_minutes", 0))
         return 0.0
 
 
@@ -334,6 +325,7 @@ def compute_tier_stats(
         metrics = a.get("metrics", {})
         if isinstance(metrics, str):
             import json
+
             try:
                 metrics = json.loads(metrics)
             except (json.JSONDecodeError, TypeError):

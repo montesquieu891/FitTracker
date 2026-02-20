@@ -44,7 +44,8 @@ def list_profiles(
         return svc.list_profiles(page=page, limit=limit, tier_code=tier_code)
     except ProfileError as exc:
         raise HTTPException(
-            status_code=exc.status_code, detail=exc.detail,
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc
 
 
@@ -61,7 +62,8 @@ def create_profile(
         return svc.create_profile(user_id=user_id, data=data)
     except ProfileError as exc:
         raise HTTPException(
-            status_code=exc.status_code, detail=exc.detail,
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc
 
 
@@ -76,7 +78,8 @@ def get_profile(profile_id: str) -> dict[str, Any]:
         return svc.get_profile(profile_id)
     except ProfileError as exc:
         raise HTTPException(
-            status_code=exc.status_code, detail=exc.detail,
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc
 
 
@@ -97,5 +100,6 @@ def update_profile(
         )
     except ProfileError as exc:
         raise HTTPException(
-            status_code=exc.status_code, detail=exc.detail,
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc

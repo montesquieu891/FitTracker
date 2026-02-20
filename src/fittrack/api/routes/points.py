@@ -5,16 +5,19 @@ Endpoints for checking balance, viewing transaction history, and weekly streak.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, Query
 
 from fittrack.api.deps import get_current_user, get_current_user_id
 
+if TYPE_CHECKING:
+    from fittrack.services.points import PointsService
+
 router = APIRouter(prefix="/api/v1/points", tags=["points"])
 
 
-def _get_points_service():  # type: ignore[no-untyped-def]
+def _get_points_service() -> PointsService:
     from fittrack.core.database import get_pool
     from fittrack.repositories.activity_repository import ActivityRepository
     from fittrack.repositories.transaction_repository import TransactionRepository
@@ -74,6 +77,7 @@ def get_daily_status(
     service = _get_points_service()
     ctx = service.get_daily_context(user_id)
     from fittrack.core.constants import DAILY_POINT_CAP
+
     return {
         "user_id": user_id,
         "points_earned_today": ctx.get("points_earned_today", 0),

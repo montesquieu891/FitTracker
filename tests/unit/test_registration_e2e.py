@@ -31,12 +31,15 @@ class TestRegistrationFlow:
                 "message": "Registration successful",
             }
 
-            resp = client.post("/api/v1/auth/register", json={
-                "email": "newuser@example.com",
-                "password": "StrongP@ss123",
-                "date_of_birth": "1990-05-15",
-                "state": "CA",
-            })
+            resp = client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": "newuser@example.com",
+                    "password": "StrongP@ss123",
+                    "date_of_birth": "1990-05-15",
+                    "state": "CA",
+                },
+            )
             assert resp.status_code == 201
             data = resp.json()
             assert "user_id" in data
@@ -50,16 +53,21 @@ class TestRegistrationFlow:
             mock_factory.return_value = mock_svc
             mock_svc.register.side_effect = AuthError("Must be 18+", 400)
 
-            resp = client.post("/api/v1/auth/register", json={
-                "email": "young@example.com",
-                "password": "StrongP@ss123",
-                "date_of_birth": "2015-01-01",
-                "state": "CA",
-            })
+            resp = client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": "young@example.com",
+                    "password": "StrongP@ss123",
+                    "date_of_birth": "2015-01-01",
+                    "state": "CA",
+                },
+            )
             assert resp.status_code == 400
 
     def test_register_rejects_excluded_state(
-        self, client: TestClient, _mock_repos: None,
+        self,
+        client: TestClient,
+        _mock_repos: None,
     ) -> None:
         """Registration must reject users from NY, FL, RI."""
         with self._patch_auth_service() as mock_factory:
@@ -68,15 +76,19 @@ class TestRegistrationFlow:
             mock_svc = MagicMock()
             mock_factory.return_value = mock_svc
             mock_svc.register.side_effect = AuthError(
-                "State not eligible", 400,
+                "State not eligible",
+                400,
             )
 
-            resp = client.post("/api/v1/auth/register", json={
-                "email": "newyorker@example.com",
-                "password": "StrongP@ss123",
-                "date_of_birth": "1990-01-01",
-                "state": "NY",
-            })
+            resp = client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": "newyorker@example.com",
+                    "password": "StrongP@ss123",
+                    "date_of_birth": "1990-01-01",
+                    "state": "NY",
+                },
+            )
             assert resp.status_code == 400
 
     def test_login_returns_tokens(self, client: TestClient, _mock_repos: None) -> None:
@@ -90,10 +102,13 @@ class TestRegistrationFlow:
                 "token_type": "bearer",
             }
 
-            resp = client.post("/api/v1/auth/login", json={
-                "email": "user@example.com",
-                "password": "StrongP@ss123",
-            })
+            resp = client.post(
+                "/api/v1/auth/login",
+                json={
+                    "email": "user@example.com",
+                    "password": "StrongP@ss123",
+                },
+            )
             assert resp.status_code == 200
             data = resp.json()
             assert "access_token" in data
@@ -101,7 +116,10 @@ class TestRegistrationFlow:
             assert data["token_type"] == "bearer"
 
     def test_profile_creation_after_auth(
-        self, client: TestClient, _mock_repos: None, user_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        user_headers: dict[str, str],
     ) -> None:
         """Authenticated user can create a profile."""
         mock_svc = MagicMock()
@@ -132,7 +150,10 @@ class TestRegistrationFlow:
             assert resp.status_code in (200, 201)
 
     def test_connect_tracker_initiate(
-        self, client: TestClient, _mock_repos: None, user_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        user_headers: dict[str, str],
     ) -> None:
         """After profile, user can initiate tracker connection."""
         mock_svc = MagicMock()
@@ -151,7 +172,9 @@ class TestRegistrationFlow:
             assert resp.status_code != 404
 
     def test_full_registration_flow_sequence(
-        self, client: TestClient, _mock_repos: None,
+        self,
+        client: TestClient,
+        _mock_repos: None,
     ) -> None:
         """Test the logical sequence: register → login → get tokens."""
         with self._patch_auth_service() as mock_factory:
@@ -164,12 +187,15 @@ class TestRegistrationFlow:
                 "email": "flow@example.com",
                 "message": "Registration successful",
             }
-            reg_resp = client.post("/api/v1/auth/register", json={
-                "email": "flow@example.com",
-                "password": "StrongP@ss123",
-                "date_of_birth": "1990-01-01",
-                "state": "TX",
-            })
+            reg_resp = client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": "flow@example.com",
+                    "password": "StrongP@ss123",
+                    "date_of_birth": "1990-01-01",
+                    "state": "TX",
+                },
+            )
             assert reg_resp.status_code == 201
 
             # Step 2: Login
@@ -178,16 +204,22 @@ class TestRegistrationFlow:
                 "refresh_token": "rt-flow",
                 "token_type": "bearer",
             }
-            login_resp = client.post("/api/v1/auth/login", json={
-                "email": "flow@example.com",
-                "password": "StrongP@ss123",
-            })
+            login_resp = client.post(
+                "/api/v1/auth/login",
+                json={
+                    "email": "flow@example.com",
+                    "password": "StrongP@ss123",
+                },
+            )
             assert login_resp.status_code == 200
             tokens = login_resp.json()
             assert "access_token" in tokens
 
     def test_me_endpoint_after_login(
-        self, client: TestClient, _mock_repos: None, user_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        user_headers: dict[str, str],
     ) -> None:
         """Authenticated user can access /users/me endpoint."""
         mock_svc = MagicMock()

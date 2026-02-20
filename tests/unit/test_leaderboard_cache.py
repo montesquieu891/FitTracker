@@ -195,8 +195,6 @@ class TestCacheServiceRedis:
         assert count == 1
         mock_redis.scan.assert_called_once()
 
-    def test_delete_pattern_handles_error(
-        self, cache: CacheService, mock_redis: MagicMock
-    ):
+    def test_delete_pattern_handles_error(self, cache: CacheService, mock_redis: MagicMock):
         mock_redis.scan.side_effect = ConnectionError("down")
         assert cache.delete_pattern("leaderboard:*") == 0

@@ -46,11 +46,10 @@ class SponsorService:
         sponsor = self.sponsor_repo.find_by_id(sponsor_id)
         if sponsor is None:
             raise SponsorError("Sponsor not found", status_code=404)
-        return sponsor
+        result: dict[str, Any] = sponsor
+        return result
 
-    def update_sponsor(
-        self, sponsor_id: str, **data: Any
-    ) -> dict[str, Any]:
+    def update_sponsor(self, sponsor_id: str, **data: Any) -> dict[str, Any]:
         """Update a sponsor."""
         sponsor = self.sponsor_repo.find_by_id(sponsor_id)
         if sponsor is None:
@@ -65,7 +64,8 @@ class SponsorService:
 
         self.sponsor_repo.update(sponsor_id, data=filtered)
         sponsor.update(filtered)
-        return sponsor
+        result: dict[str, Any] = sponsor
+        return result
 
     def deactivate_sponsor(self, sponsor_id: str) -> dict[str, Any]:
         """Set sponsor status to inactive."""
@@ -91,9 +91,7 @@ class SponsorService:
 
         total = self.sponsor_repo.count(filters=filters)
         offset = (page - 1) * limit
-        items = self.sponsor_repo.find_all(
-            limit=limit, offset=offset, filters=filters
-        )
+        items = self.sponsor_repo.find_all(limit=limit, offset=offset, filters=filters)
         total_pages = max(1, (total + limit - 1) // limit)
 
         return {
@@ -112,4 +110,4 @@ class SponsorService:
         if sponsor is None:
             raise SponsorError("Sponsor not found", status_code=404)
         affected = self.sponsor_repo.delete(sponsor_id)
-        return affected > 0
+        return bool(affected > 0)

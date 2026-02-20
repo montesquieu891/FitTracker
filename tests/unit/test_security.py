@@ -22,6 +22,7 @@ from fittrack.core.security import (
 
 # ── Password Hashing ────────────────────────────────────────────────
 
+
 class TestPasswordHashing:
     """Tests for Argon2id password hashing."""
 
@@ -60,6 +61,7 @@ class TestPasswordHashing:
 
 
 # ── Password Complexity ─────────────────────────────────────────────
+
 
 class TestPasswordComplexity:
     """Tests for password validation rules."""
@@ -104,12 +106,11 @@ class TestPasswordComplexity:
         for char in "!@#$%^&*()_+-=[]{}|;':\",./<>?`~":
             pwd = f"Str0ng{char}Pass"
             errors = validate_password_complexity(pwd)
-            assert not any("special" in e for e in errors), (
-                f"Special char '{char}' not accepted"
-            )
+            assert not any("special" in e for e in errors), f"Special char '{char}' not accepted"
 
 
 # ── JWT Token Operations ────────────────────────────────────────────
+
 
 class TestJWT:
     """Tests for JWT creation and verification."""

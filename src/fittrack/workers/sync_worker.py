@@ -87,9 +87,7 @@ class SyncWorker:
             except Exception as e:
                 user_id = conn.get("user_id", "unknown")
                 provider = conn.get("provider", "unknown")
-                logger.error(
-                    "Sync failed for %s/%s: %s", user_id, provider, e, exc_info=True
-                )
+                logger.error("Sync failed for %s/%s: %s", user_id, provider, e, exc_info=True)
                 error_result = SyncResult(user_id, provider)
                 error_result.success = False
                 error_result.errors.append(str(e))
@@ -101,11 +99,14 @@ class SyncWorker:
                     import contextlib
 
                     with contextlib.suppress(Exception):
-                        self.connection_repo.update(conn_id, {
-                            "sync_status": "error",
-                            "error_message": str(e)[:500],
-                            "updated_at": datetime.now(tz=UTC),
-                        })
+                        self.connection_repo.update(
+                            conn_id,
+                            {
+                                "sync_status": "error",
+                                "error_message": str(e)[:500],
+                                "updated_at": datetime.now(tz=UTC),
+                            },
+                        )
 
         logger.info(
             "Sync batch complete: %d processed, %d success",
@@ -163,9 +164,7 @@ class SyncWorker:
 
         # Get existing activities for deduplication
         try:
-            existing = self.activity_repo.find_by_user_and_date_range(
-                user_id, start_time, end_time
-            )
+            existing = self.activity_repo.find_by_user_and_date_range(user_id, start_time, end_time)
         except Exception:
             existing = []
 
@@ -183,6 +182,7 @@ class SyncWorker:
 
                 # Store
                 import uuid
+
                 activity_id = uuid.uuid4().hex
                 self.activity_repo.create(data=activity_data, new_id=activity_id)
                 activity_data["activity_id"] = activity_id
@@ -198,10 +198,13 @@ class SyncWorker:
 
                     # Update the activity with points earned
                     if awarded > 0:
-                        self.activity_repo.update(activity_id, {
-                            "points_earned": awarded,
-                            "processed": 1,
-                        })
+                        self.activity_repo.update(
+                            activity_id,
+                            {
+                                "points_earned": awarded,
+                                "processed": 1,
+                            },
+                        )
                 except Exception as e:
                     result.errors.append(f"Points error: {e}")
 
@@ -213,14 +216,15 @@ class SyncWorker:
 
         # Update connection with last sync time
         try:
-            self.connection_repo.update(connection_id, {
-                "last_sync_at": end_time,
-                "sync_status": "synced" if result.success else "error",
-                "error_message": (
-                    "; ".join(result.errors[:3]) if result.errors else None
-                ),
-                "updated_at": datetime.now(tz=UTC),
-            })
+            self.connection_repo.update(
+                connection_id,
+                {
+                    "last_sync_at": end_time,
+                    "sync_status": "synced" if result.success else "error",
+                    "error_message": ("; ".join(result.errors[:3]) if result.errors else None),
+                    "updated_at": datetime.now(tz=UTC),
+                },
+            )
         except Exception as e:
             result.errors.append(f"Connection update error: {e}")
 

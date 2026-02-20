@@ -210,10 +210,7 @@ class TestTieBreakingScenarios:
 
     def test_ranks_are_sequential(self):
         """Ranks must be 1, 2, 3, ... N with no gaps."""
-        entries = [
-            {"user_id": f"u{i}", "points_earned": i * 10}
-            for i in range(10)
-        ]
+        entries = [{"user_id": f"u{i}", "points_earned": i * 10} for i in range(10)]
         ranked = compute_rankings(entries)
         ranks = [r["rank"] for r in ranked]
         assert ranks == list(range(1, 11))

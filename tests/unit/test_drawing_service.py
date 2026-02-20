@@ -134,9 +134,7 @@ class TestCreateDrawing:
 
     def test_create_custom_cost(self):
         svc = _make_service()
-        result = svc.create_drawing(
-            drawing_type="daily", name="Custom", ticket_cost_points=250
-        )
+        result = svc.create_drawing(drawing_type="daily", name="Custom", ticket_cost_points=250)
         assert result["ticket_cost_points"] == 250
 
     def test_create_invalid_type_raises(self):
@@ -147,9 +145,7 @@ class TestCreateDrawing:
     def test_create_sets_ticket_sales_close(self):
         svc = _make_service()
         draw_time = datetime(2026, 3, 1, 18, 0, tzinfo=UTC)
-        result = svc.create_drawing(
-            drawing_type="daily", name="Test", drawing_time=draw_time
-        )
+        result = svc.create_drawing(drawing_type="daily", name="Test", drawing_time=draw_time)
         expected = draw_time - timedelta(minutes=5)
         assert result["ticket_sales_close"] == expected
 
@@ -163,9 +159,7 @@ class TestCreateDrawing:
 
 
 class TestDrawingLifecycle:
-    def _make_drawing(
-        self, status: str = "draft", **kwargs: Any
-    ) -> dict[str, Any]:
+    def _make_drawing(self, status: str = "draft", **kwargs: Any) -> dict[str, Any]:
         return {
             "drawing_id": "d1",
             "drawing_type": "daily",

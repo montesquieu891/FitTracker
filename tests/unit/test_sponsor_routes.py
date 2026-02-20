@@ -12,9 +12,7 @@ class TestSponsorListRoute:
     """Test GET /api/v1/sponsors."""
 
     @patch("fittrack.api.routes.sponsors._get_repo")
-    def test_list_sponsors(
-        self, mock_repo_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_list_sponsors(self, mock_repo_factory: MagicMock, client: TestClient) -> None:
         mock_repo = MagicMock()
         mock_repo.find_all.return_value = [
             {"sponsor_id": "s1", "name": "Acme Corp", "status": "active"}
@@ -25,9 +23,7 @@ class TestSponsorListRoute:
         assert resp.status_code == 200
 
     @patch("fittrack.api.routes.sponsors._get_repo")
-    def test_list_sponsors_empty(
-        self, mock_repo_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_list_sponsors_empty(self, mock_repo_factory: MagicMock, client: TestClient) -> None:
         mock_repo = MagicMock()
         mock_repo.find_all.return_value = []
         mock_repo.count.return_value = 0
@@ -40,9 +36,7 @@ class TestSponsorGetRoute:
     """Test GET /api/v1/sponsors/{id}."""
 
     @patch("fittrack.api.routes.sponsors._get_repo")
-    def test_get_sponsor(
-        self, mock_repo_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_get_sponsor(self, mock_repo_factory: MagicMock, client: TestClient) -> None:
         mock_repo = MagicMock()
         mock_repo.find_by_id.return_value = {
             "sponsor_id": "s1",
@@ -55,9 +49,7 @@ class TestSponsorGetRoute:
         assert resp.json()["name"] == "Acme Corp"
 
     @patch("fittrack.api.routes.sponsors._get_repo")
-    def test_get_not_found(
-        self, mock_repo_factory: MagicMock, client: TestClient
-    ) -> None:
+    def test_get_not_found(self, mock_repo_factory: MagicMock, client: TestClient) -> None:
         mock_repo = MagicMock()
         mock_repo.find_by_id.return_value = None
         mock_repo_factory.return_value = mock_repo
@@ -68,9 +60,7 @@ class TestSponsorGetRoute:
 class TestSponsorCreateRoute:
     """Test POST /api/v1/sponsors (admin)."""
 
-    def test_create_requires_admin(
-        self, client: TestClient, user_headers: dict
-    ) -> None:
+    def test_create_requires_admin(self, client: TestClient, user_headers: dict) -> None:
         resp = client.post(
             "/api/v1/sponsors",
             json={"name": "Test"},
@@ -100,12 +90,8 @@ class TestSponsorCreateRoute:
 class TestSponsorDeleteRoute:
     """Test DELETE /api/v1/sponsors/{id} (admin)."""
 
-    def test_delete_requires_admin(
-        self, client: TestClient, user_headers: dict
-    ) -> None:
-        resp = client.delete(
-            "/api/v1/sponsors/s1", headers=user_headers
-        )
+    def test_delete_requires_admin(self, client: TestClient, user_headers: dict) -> None:
+        resp = client.delete("/api/v1/sponsors/s1", headers=user_headers)
         assert resp.status_code == 403
 
     @patch("fittrack.api.routes.sponsors._get_repo")
@@ -118,9 +104,7 @@ class TestSponsorDeleteRoute:
         mock_repo = MagicMock()
         mock_repo.delete.return_value = 1
         mock_repo_factory.return_value = mock_repo
-        resp = client.delete(
-            "/api/v1/sponsors/s1", headers=admin_headers
-        )
+        resp = client.delete("/api/v1/sponsors/s1", headers=admin_headers)
         assert resp.status_code == 204
 
     @patch("fittrack.api.routes.sponsors._get_repo")
@@ -133,9 +117,7 @@ class TestSponsorDeleteRoute:
         mock_repo = MagicMock()
         mock_repo.delete.return_value = 0
         mock_repo_factory.return_value = mock_repo
-        resp = client.delete(
-            "/api/v1/sponsors/s1", headers=admin_headers
-        )
+        resp = client.delete("/api/v1/sponsors/s1", headers=admin_headers)
         assert resp.status_code == 404
 
 
@@ -170,9 +152,7 @@ class TestSponsorServiceUnit:
         from fittrack.services.sponsors import SponsorService
 
         mock_repo = MagicMock()
-        mock_repo.find_by_id.return_value = {
-            "sponsor_id": "s1", "name": "Test", "status": "active"
-        }
+        mock_repo.find_by_id.return_value = {"sponsor_id": "s1", "name": "Test", "status": "active"}
         mock_repo.update.return_value = 1
         svc = SponsorService(sponsor_repo=mock_repo)
         result = svc.deactivate_sponsor("s1")
@@ -183,7 +163,9 @@ class TestSponsorServiceUnit:
 
         mock_repo = MagicMock()
         mock_repo.find_by_id.return_value = {
-            "sponsor_id": "s1", "name": "Test", "status": "inactive"
+            "sponsor_id": "s1",
+            "name": "Test",
+            "status": "inactive",
         }
         mock_repo.update.return_value = 1
         svc = SponsorService(sponsor_repo=mock_repo)
@@ -213,9 +195,7 @@ class TestSponsorServiceUnit:
 
         mock_repo = MagicMock()
         mock_repo.count.return_value = 2
-        mock_repo.find_all.return_value = [
-            {"sponsor_id": "s1"}, {"sponsor_id": "s2"}
-        ]
+        mock_repo.find_all.return_value = [{"sponsor_id": "s1"}, {"sponsor_id": "s2"}]
         svc = SponsorService(sponsor_repo=mock_repo)
         result = svc.list_sponsors(status="active")
         assert result["pagination"]["total_items"] == 2

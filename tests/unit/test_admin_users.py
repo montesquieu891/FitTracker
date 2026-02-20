@@ -148,8 +148,7 @@ class TestSearchUsers:
 
     def test_search_pagination(self) -> None:
         users = [
-            {"user_id": f"u{i}", "email": f"u{i}@test.com", "status": "active"}
-            for i in range(5)
+            {"user_id": f"u{i}", "email": f"u{i}@test.com", "status": "active"} for i in range(5)
         ]
         svc = _make_service(users=users)
         result = svc.search_users(page=1, limit=2)
@@ -180,9 +179,7 @@ class TestChangeUserStatus:
         assert result["new_status"] == "banned"
 
     def test_activate_suspended_user(self) -> None:
-        users = [
-            {"user_id": "u1", "status": "suspended", "email": "a@b.com"}
-        ]
+        users = [{"user_id": "u1", "status": "suspended", "email": "a@b.com"}]
         svc = _make_service(users=users)
         result = svc.activate_user("u1", "admin1")
         assert result["new_status"] == "active"
@@ -221,9 +218,7 @@ class TestChangeUserStatus:
                     }
                 ]
                 svc = _make_service(users=users)
-                result = svc.change_user_status(
-                    "u1", to_status, "admin1"
-                )
+                result = svc.change_user_status("u1", to_status, "admin1")
                 assert result["new_status"] == to_status
 
     def test_status_change_logs_action(self) -> None:
@@ -343,9 +338,7 @@ class TestActionLog:
             {"log_id": "l1", "action_type": "status_change"}
         ]
         svc.action_log_repo.count.return_value = 1
-        result = svc.get_action_log(
-            admin_id="admin1", action_type="status_change"
-        )
+        result = svc.get_action_log(admin_id="admin1", action_type="status_change")
         assert result["pagination"]["total_items"] == 1
 
     def test_get_action_log_by_target(self) -> None:
@@ -371,9 +364,7 @@ class TestUserDetail:
                 "point_balance": 500,
             }
         ]
-        profiles = [
-            {"user_id": "u1", "display_name": "John", "tier_code": "M-18-29-BEG"}
-        ]
+        profiles = [{"user_id": "u1", "display_name": "John", "tier_code": "M-18-29-BEG"}]
         svc = _make_service(users=users, profiles=profiles)
         svc.transaction_repo.find_all.return_value = []
         result = svc.get_user_detail("u1")

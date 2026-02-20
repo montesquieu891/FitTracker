@@ -5,16 +5,19 @@ CP4: Fully service-backed with OAuth flow endpoints.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from fittrack.api.deps import get_current_user, get_current_user_id
 
+if TYPE_CHECKING:
+    from fittrack.services.trackers import TrackerService
+
 router = APIRouter(prefix="/api/v1/connections", tags=["connections"])
 
 
-def _get_tracker_service():  # type: ignore[no-untyped-def]
+def _get_tracker_service() -> TrackerService:
     from fittrack.core.database import get_pool
     from fittrack.repositories.connection_repository import ConnectionRepository
     from fittrack.services.providers.fitbit import FitbitProvider

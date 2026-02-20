@@ -8,14 +8,11 @@ without Oracle.
 
 from __future__ import annotations
 
-import uuid
-from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-
 
 # ── In-memory fake repos ────────────────────────────────────────────
 
@@ -123,10 +120,13 @@ class TestD1RegisterLoginMe:
         # Register first
         self._register(d1_client)
         # Login
-        resp = d1_client.post("/api/v1/auth/login", json={
-            "email": _REG_PAYLOAD["email"],
-            "password": _REG_PAYLOAD["password"],
-        })
+        resp = d1_client.post(
+            "/api/v1/auth/login",
+            json={
+                "email": _REG_PAYLOAD["email"],
+                "password": _REG_PAYLOAD["password"],
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert "access_token" in data
@@ -136,10 +136,13 @@ class TestD1RegisterLoginMe:
     def test_me_with_token_from_login(self, d1_client: TestClient) -> None:
         """register → login → GET /me with Bearer token."""
         self._register(d1_client)
-        login_resp = d1_client.post("/api/v1/auth/login", json={
-            "email": _REG_PAYLOAD["email"],
-            "password": _REG_PAYLOAD["password"],
-        })
+        login_resp = d1_client.post(
+            "/api/v1/auth/login",
+            json={
+                "email": _REG_PAYLOAD["email"],
+                "password": _REG_PAYLOAD["password"],
+            },
+        )
         token = login_resp.json()["access_token"]
 
         me_resp = d1_client.get(
@@ -170,10 +173,13 @@ class TestD1RegisterLoginMe:
 
     def test_wrong_password_rejected(self, d1_client: TestClient) -> None:
         self._register(d1_client)
-        resp = d1_client.post("/api/v1/auth/login", json={
-            "email": _REG_PAYLOAD["email"],
-            "password": "WrongPassword123!",
-        })
+        resp = d1_client.post(
+            "/api/v1/auth/login",
+            json={
+                "email": _REG_PAYLOAD["email"],
+                "password": "WrongPassword123!",
+            },
+        )
         assert resp.status_code == 401
 
     # helper
@@ -227,9 +233,12 @@ class TestD1EdgeCases:
 
     def test_refresh_token_works(self, d1_client: TestClient) -> None:
         reg = self._register(d1_client)
-        resp = d1_client.post("/api/v1/auth/refresh", json={
-            "refresh_token": reg["refresh_token"],
-        })
+        resp = d1_client.post(
+            "/api/v1/auth/refresh",
+            json={
+                "refresh_token": reg["refresh_token"],
+            },
+        )
         assert resp.status_code == 200
         assert "access_token" in resp.json()
 

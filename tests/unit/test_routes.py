@@ -37,7 +37,10 @@ class TestUserRoutes:
         assert "pagination" in data
 
     def test_create_user_201(
-        self, client: TestClient, mock_cursor: MockCursor, admin_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        admin_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 1
         resp = client.post(
@@ -74,16 +77,24 @@ class TestUserRoutes:
         assert resp.status_code == 404
 
     def test_update_user_200(
-        self, client: TestClient, mock_cursor: MockCursor, admin_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        admin_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 1
         resp = client.patch(
-            "/api/v1/users/u1", json={"status": "active"}, headers=admin_headers,
+            "/api/v1/users/u1",
+            json={"status": "active"},
+            headers=admin_headers,
         )
         assert resp.status_code == 200
 
     def test_delete_user_204(
-        self, client: TestClient, mock_cursor: MockCursor, admin_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        admin_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 1
         resp = client.delete("/api/v1/users/u1", headers=admin_headers)
@@ -101,7 +112,10 @@ class TestSponsorRoutes:
         assert "items" in data
 
     def test_create_sponsor_201(
-        self, client: TestClient, mock_cursor: MockCursor, admin_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        admin_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 1
         resp = client.post(
@@ -135,7 +149,10 @@ class TestDrawingRoutes:
         assert resp.status_code == 200
 
     def test_create_drawing_201(
-        self, client: TestClient, mock_cursor: MockCursor, admin_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        admin_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 1
         resp = client.post(
@@ -153,13 +170,20 @@ class TestDrawingRoutes:
 
     @patch("fittrack.api.routes.drawings._get_drawing_service")
     def test_get_drawing_200(
-        self, mock_factory: MagicMock, client: TestClient, mock_cursor: MockCursor,
+        self,
+        mock_factory: MagicMock,
+        client: TestClient,
+        mock_cursor: MockCursor,
     ) -> None:
         mock_svc = MagicMock()
         mock_svc.get_drawing.return_value = {
-            "drawing_id": "d1", "drawing_type": "daily",
-            "name": "Daily Draw", "ticket_cost_points": 100,
-            "status": "open", "prizes": [], "total_tickets": 0,
+            "drawing_id": "d1",
+            "drawing_type": "daily",
+            "name": "Daily Draw",
+            "ticket_cost_points": 100,
+            "status": "open",
+            "prizes": [],
+            "total_tickets": 0,
         }
         mock_factory.return_value = mock_svc
         resp = client.get("/api/v1/drawings/d1")
@@ -167,9 +191,13 @@ class TestDrawingRoutes:
 
     @patch("fittrack.api.routes.drawings._get_drawing_service")
     def test_get_drawing_404(
-        self, mock_factory: MagicMock, client: TestClient, mock_cursor: MockCursor,
+        self,
+        mock_factory: MagicMock,
+        client: TestClient,
+        mock_cursor: MockCursor,
     ) -> None:
         from fittrack.services.drawings import DrawingError
+
         mock_svc = MagicMock()
         mock_svc.get_drawing.side_effect = DrawingError("not found", 404)
         mock_factory.return_value = mock_svc
@@ -189,7 +217,10 @@ class TestProfileRoutes:
         assert "pagination" in data
 
     def test_create_profile_201(
-        self, client: TestClient, mock_cursor: MockCursor, user_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        user_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 1
         resp = client.post(
@@ -242,7 +273,10 @@ class TestProfileRoutes:
         assert resp.status_code == 404
 
     def test_update_profile_200(
-        self, client: TestClient, mock_cursor: MockCursor, user_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        user_headers: dict,
     ) -> None:
         # Ownership check: find_by_id must return a profile owned by test-user
         set_mock_query_result(
@@ -264,7 +298,10 @@ class TestConnectionRoutes:
     """Test /api/v1/connections endpoints (CP4: OAuth flow routes)."""
 
     def test_list_connections_200(
-        self, client: TestClient, mock_cursor: MockCursor, user_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        user_headers: dict,
     ) -> None:
         set_mock_query_result(mock_cursor, ["connection_id"], [])
         resp = client.get("/api/v1/connections", headers=user_headers)
@@ -273,13 +310,18 @@ class TestConnectionRoutes:
         assert "items" in data
 
     def test_list_connections_requires_auth(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
     ) -> None:
         resp = client.get("/api/v1/connections")
         assert resp.status_code == 401
 
     def test_initiate_oauth_200(
-        self, client: TestClient, mock_cursor: MockCursor, user_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        user_headers: dict,
     ) -> None:
         set_mock_query_result(mock_cursor, ["connection_id"], [])
         resp = client.post(
@@ -291,7 +333,10 @@ class TestConnectionRoutes:
         assert "authorization_url" in data
 
     def test_unsupported_provider_400(
-        self, client: TestClient, mock_cursor: MockCursor, user_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        user_headers: dict,
     ) -> None:
         resp = client.post(
             "/api/v1/connections/apple_health/initiate?redirect_uri=http://cb",
@@ -300,16 +345,22 @@ class TestConnectionRoutes:
         assert resp.status_code == 400
 
     def test_disconnect_requires_auth(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
     ) -> None:
         resp = client.delete("/api/v1/connections/google_fit")
         assert resp.status_code == 401
 
     def test_disconnect_unsupported_provider_400(
-        self, client: TestClient, mock_cursor: MockCursor, user_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        user_headers: dict,
     ) -> None:
         resp = client.delete(
-            "/api/v1/connections/apple_health", headers=user_headers,
+            "/api/v1/connections/apple_health",
+            headers=user_headers,
         )
         assert resp.status_code == 400
 
@@ -318,13 +369,18 @@ class TestActivityRoutes:
     """Test /api/v1/activities endpoints (CP4: auth-required)."""
 
     def test_list_activities_requires_auth(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
     ) -> None:
         resp = client.get("/api/v1/activities")
         assert resp.status_code == 401
 
     def test_list_activities_200(
-        self, client: TestClient, mock_cursor: MockCursor, user_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        user_headers: dict,
     ) -> None:
         set_mock_query_result(mock_cursor, ["cnt"], [(0,)])
         resp = client.get("/api/v1/activities", headers=user_headers)
@@ -334,16 +390,23 @@ class TestActivityRoutes:
         assert "pagination" in data
 
     def test_list_activities_with_filters(
-        self, client: TestClient, mock_cursor: MockCursor, user_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        user_headers: dict,
     ) -> None:
         set_mock_query_result(mock_cursor, ["cnt"], [(0,)])
         resp = client.get(
-            "/api/v1/activities?activity_type=steps", headers=user_headers,
+            "/api/v1/activities?activity_type=steps",
+            headers=user_headers,
         )
         assert resp.status_code == 200
 
     def test_create_activity_201(
-        self, client: TestClient, mock_cursor: MockCursor, user_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        user_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 1
         resp = client.post(
@@ -384,14 +447,19 @@ class TestTransactionRoutes:
         assert "pagination" in data
 
     def test_list_transactions_filter_by_user(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
     ) -> None:
         set_mock_query_result(mock_cursor, ["cnt"], [(0,)])
         resp = client.get("/api/v1/transactions?user_id=u1")
         assert resp.status_code == 200
 
     def test_create_transaction_201(
-        self, client: TestClient, mock_cursor: MockCursor, user_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        user_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 1
         resp = client.post(
@@ -409,7 +477,9 @@ class TestTransactionRoutes:
         assert "transaction_id" in data
 
     def test_create_transaction_invalid_type_422(
-        self, client: TestClient, user_headers: dict,
+        self,
+        client: TestClient,
+        user_headers: dict,
     ) -> None:
         resp = client.post(
             "/api/v1/transactions",
@@ -440,7 +510,10 @@ class TestTicketRoutes:
         assert resp.status_code == 200
 
     def test_create_ticket_201(
-        self, client: TestClient, mock_cursor: MockCursor, user_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        user_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 1
         resp = client.post(
@@ -469,7 +542,10 @@ class TestPrizeRoutes:
         assert resp.status_code == 200
 
     def test_create_prize_201(
-        self, client: TestClient, mock_cursor: MockCursor, admin_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        admin_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 1
         resp = client.post(
@@ -504,8 +580,11 @@ class TestFulfillmentRoutes:
 
     @patch("fittrack.api.routes.fulfillments._get_service")
     def test_list_fulfillments_200(
-        self, mock_factory: MagicMock, client: TestClient,
-        mock_cursor: MockCursor, admin_headers: dict,
+        self,
+        mock_factory: MagicMock,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        admin_headers: dict,
     ) -> None:
         mock_svc = MagicMock()
         mock_svc.list_fulfillments.return_value = {
@@ -520,8 +599,11 @@ class TestFulfillmentRoutes:
 
     @patch("fittrack.api.routes.fulfillments._get_service")
     def test_list_fulfillments_by_user(
-        self, mock_factory: MagicMock, client: TestClient,
-        mock_cursor: MockCursor, admin_headers: dict,
+        self,
+        mock_factory: MagicMock,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        admin_headers: dict,
     ) -> None:
         mock_svc = MagicMock()
         mock_svc.list_fulfillments.return_value = {
@@ -533,7 +615,10 @@ class TestFulfillmentRoutes:
         assert resp.status_code == 200
 
     def test_create_fulfillment_201(
-        self, client: TestClient, mock_cursor: MockCursor, admin_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        admin_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 1
         resp = client.post(
@@ -551,12 +636,17 @@ class TestFulfillmentRoutes:
 
     @patch("fittrack.api.routes.fulfillments._get_service")
     def test_update_fulfillment_200(
-        self, mock_factory: MagicMock, client: TestClient,
-        mock_cursor: MockCursor, admin_headers: dict,
+        self,
+        mock_factory: MagicMock,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        admin_headers: dict,
     ) -> None:
         mock_svc = MagicMock()
         mock_svc.transition_status.return_value = {
-            "fulfillment_id": "f1", "status": "winner_notified", "updated": True,
+            "fulfillment_id": "f1",
+            "status": "winner_notified",
+            "updated": True,
         }
         mock_factory.return_value = mock_svc
         resp = client.put(
@@ -567,7 +657,10 @@ class TestFulfillmentRoutes:
         assert resp.status_code == 200
 
     def test_update_fulfillment_404(
-        self, client: TestClient, mock_cursor: MockCursor, admin_headers: dict,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
+        admin_headers: dict,
     ) -> None:
         mock_cursor.rowcount = 0
         resp = client.put(
@@ -578,7 +671,9 @@ class TestFulfillmentRoutes:
         assert resp.status_code == 404
 
     def test_update_fulfillment_invalid_status_422(
-        self, client: TestClient, admin_headers: dict,
+        self,
+        client: TestClient,
+        admin_headers: dict,
     ) -> None:
         resp = client.put(
             "/api/v1/fulfillments/f1",

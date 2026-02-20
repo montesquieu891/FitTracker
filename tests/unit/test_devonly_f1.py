@@ -6,8 +6,6 @@ available in development but return 404 in production.
 
 from __future__ import annotations
 
-from unittest.mock import patch
-
 import pytest
 from fastapi.testclient import TestClient
 
@@ -57,7 +55,7 @@ class TestF1DevAvailable:
 
     def test_static_test_page_mounted(self, dev_client: TestClient) -> None:
         """Static mount exists in dev (may 404 if file missing, but route exists)."""
-        resp = dev_client.get("/static/test_page.html")
+        dev_client.get("/static/test_page.html")
         # In a test environment without the static dir, this may be 404 from
         # StaticFiles or 200 if the file exists. The key is that the mount
         # is created at all (not stripped out).

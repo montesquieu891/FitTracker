@@ -6,16 +6,19 @@ and checking unread counts.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from fittrack.api.deps import get_current_user, get_current_user_id
 
+if TYPE_CHECKING:
+    from fittrack.services.notifications import NotificationService
+
 router = APIRouter(prefix="/api/v1/notifications", tags=["notifications"])
 
 
-def _get_service():
+def _get_service() -> NotificationService:
     """Build NotificationService with real repository."""
     from fittrack.core.database import get_pool
     from fittrack.repositories.notification_repository import (
@@ -68,9 +71,7 @@ def get_notification(
     try:
         notification = svc.get_notification(notification_id)
     except NotificationError as e:
-        raise HTTPException(
-            status_code=e.status_code, detail=e.detail
-        ) from e
+        raise HTTPException(status_code=e.status_code, detail=e.detail) from e
 
     # Ensure user can only see their own notifications
     if notification.get("user_id") != current_user.get("sub"):
@@ -91,6 +92,4 @@ def mark_as_read(
     try:
         return svc.mark_as_read(notification_id, user_id)
     except NotificationError as e:
-        raise HTTPException(
-            status_code=e.status_code, detail=e.detail
-        ) from e
+        raise HTTPException(status_code=e.status_code, detail=e.detail) from e

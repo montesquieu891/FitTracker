@@ -266,6 +266,7 @@ class TestCalculateActivityPoints:
 
     def test_metrics_as_json_string(self):
         import json
+
         activity = {
             "activity_type": "steps",
             "metrics": json.dumps({"step_count": 5000}),
@@ -300,17 +301,11 @@ class MockRepo:
     def find_all(self, limit=20, offset=0, filters=None):
         result = self.data
         if filters:
-            result = [
-                d for d in result
-                if all(d.get(k) == v for k, v in filters.items())
-            ]
-        return result[offset:offset + limit]
+            result = [d for d in result if all(d.get(k) == v for k, v in filters.items())]
+        return result[offset : offset + limit]
 
     def find_by_user_and_date_range(self, user_id, start, end):
-        return [
-            d for d in self.data
-            if d.get("user_id") == user_id
-        ]
+        return [d for d in self.data if d.get("user_id") == user_id]
 
     def create(self, data, new_id=None):
         data["id"] = new_id
@@ -411,6 +406,7 @@ class TestPointsService:
     def test_award_points_daily_cap(self):
         # User already earned 990 today
         from datetime import UTC, datetime
+
         now = datetime.now(tz=UTC)
         txns = [
             {

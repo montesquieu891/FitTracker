@@ -53,11 +53,13 @@ class ProfileService:
         profile = self.profile_repo.find_by_id(profile_id)
         if profile is None:
             raise ProfileError("Profile not found", status_code=404)
-        return profile
+        result: dict[str, Any] = profile
+        return result
 
     def get_profile_by_user_id(self, user_id: str) -> dict[str, Any] | None:
         """Get a profile by user_id. Returns None if not found."""
-        return self.profile_repo.find_by_user_id(user_id)
+        result: dict[str, Any] | None = self.profile_repo.find_by_user_id(user_id)
+        return result
 
     def list_profiles(
         self,
@@ -75,7 +77,9 @@ class ProfileService:
         total = self.profile_repo.count(filters=filters)
         offset = (page - 1) * limit
         items = self.profile_repo.find_all(
-            limit=limit, offset=offset, filters=filters,
+            limit=limit,
+            offset=offset,
+            filters=filters,
         )
         total_pages = max(1, (total + limit - 1) // limit)
 
@@ -103,7 +107,8 @@ class ProfileService:
         existing = self.profile_repo.find_by_user_id(user_id)
         if existing:
             raise ProfileError(
-                "User already has a profile", status_code=409,
+                "User already has a profile",
+                status_code=409,
             )
 
         # Validate tier-relevant fields
@@ -154,13 +159,16 @@ class ProfileService:
 
             merged = {
                 "biological_sex": data.get(
-                    "biological_sex", existing.get("biological_sex"),
+                    "biological_sex",
+                    existing.get("biological_sex"),
                 ),
                 "age_bracket": data.get(
-                    "age_bracket", existing.get("age_bracket"),
+                    "age_bracket",
+                    existing.get("age_bracket"),
                 ),
                 "fitness_level": data.get(
-                    "fitness_level", existing.get("fitness_level"),
+                    "fitness_level",
+                    existing.get("fitness_level"),
                 ),
             }
 
@@ -211,9 +219,7 @@ class ProfileService:
 
         profile = self.profile_repo.find_by_user_id(user_id)
         result = {**user, "profile": profile}
-        result["profile_complete"] = (
-            self.is_profile_complete(profile) if profile else False
-        )
+        result["profile_complete"] = self.is_profile_complete(profile) if profile else False
         return result
 
     def get_public_profile(self, user_id: str) -> dict[str, Any]:

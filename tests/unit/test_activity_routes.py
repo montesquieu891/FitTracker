@@ -13,7 +13,9 @@ class TestListActivities:
         assert resp.status_code == 401
 
     def test_lists_activities(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         # First call is count, second is find_all
@@ -29,13 +31,13 @@ class TestListActivities:
         assert "pagination" in data
 
     def test_pagination_params(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(mock_cursor, ["cnt"], [(0,)])
-        resp = client.get(
-            "/api/v1/activities?page=2&limit=10", headers=user_headers
-        )
+        resp = client.get("/api/v1/activities?page=2&limit=10", headers=user_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert data["pagination"]["page"] == 2
@@ -48,14 +50,14 @@ class TestActivitySummary:
         assert resp.status_code == 401
 
     def test_summary_today(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         # find_by_user_and_date_range returns no activities
         set_mock_query_result(mock_cursor, ["activity_id"], [])
-        resp = client.get(
-            "/api/v1/activities/summary?period=today", headers=user_headers
-        )
+        resp = client.get("/api/v1/activities/summary?period=today", headers=user_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert data["period"] == "today"
@@ -63,34 +65,34 @@ class TestActivitySummary:
         assert data["workout_count"] == 0
 
     def test_summary_week(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(mock_cursor, ["activity_id"], [])
-        resp = client.get(
-            "/api/v1/activities/summary?period=week", headers=user_headers
-        )
+        resp = client.get("/api/v1/activities/summary?period=week", headers=user_headers)
         assert resp.status_code == 200
         assert resp.json()["period"] == "week"
 
     def test_summary_month(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(mock_cursor, ["activity_id"], [])
-        resp = client.get(
-            "/api/v1/activities/summary?period=month", headers=user_headers
-        )
+        resp = client.get("/api/v1/activities/summary?period=month", headers=user_headers)
         assert resp.status_code == 200
         assert resp.json()["period"] == "month"
 
     def test_invalid_period(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
-        resp = client.get(
-            "/api/v1/activities/summary?period=year", headers=user_headers
-        )
+        resp = client.get("/api/v1/activities/summary?period=year", headers=user_headers)
         assert resp.status_code == 422
 
 
@@ -100,7 +102,9 @@ class TestCreateActivity:
         assert resp.status_code == 401
 
     def test_create_activity(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         # get_current_user -> user query
@@ -122,7 +126,9 @@ class TestCreateActivity:
         assert data["activity_type"] == "steps"
 
     def test_invalid_activity_type(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         body = {
@@ -134,7 +140,9 @@ class TestCreateActivity:
         assert resp.status_code == 422
 
     def test_create_workout(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(
@@ -155,7 +163,9 @@ class TestCreateActivity:
         assert resp.status_code == 201
 
     def test_create_active_minutes(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(

@@ -18,7 +18,10 @@ class TestActivityFlow:
         """Ensure DB pool is mocked for all tests."""
 
     def test_submit_activity_earns_points(
-        self, client: TestClient, _mock_repos: None, user_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        user_headers: dict[str, str],
     ) -> None:
         """POST /api/v1/activities should record activity."""
         mock_repo = MagicMock()
@@ -26,7 +29,8 @@ class TestActivityFlow:
         mock_repo.find_by_field.return_value = []
 
         with patch(
-            "fittrack.api.routes.activities._get_repo", return_value=mock_repo,
+            "fittrack.api.routes.activities._get_repo",
+            return_value=mock_repo,
         ):
             resp = client.post(
                 "/api/v1/activities",
@@ -42,7 +46,10 @@ class TestActivityFlow:
             assert resp.status_code in (200, 201)
 
     def test_list_activities(
-        self, client: TestClient, _mock_repos: None, user_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        user_headers: dict[str, str],
     ) -> None:
         """GET /api/v1/activities should list user's activities."""
         mock_repo = MagicMock()
@@ -61,7 +68,8 @@ class TestActivityFlow:
         mock_repo.count.return_value = 1
 
         with patch(
-            "fittrack.api.routes.activities._get_repo", return_value=mock_repo,
+            "fittrack.api.routes.activities._get_repo",
+            return_value=mock_repo,
         ):
             resp = client.get("/api/v1/activities", headers=user_headers)
             assert resp.status_code == 200
@@ -95,7 +103,10 @@ class TestActivityFlow:
         assert DAILY_POINT_CAP == 1000
 
     def test_view_transactions(
-        self, client: TestClient, _mock_repos: None, user_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        user_headers: dict[str, str],
     ) -> None:
         """GET /api/v1/transactions should show point history."""
         mock_repo = MagicMock()
@@ -113,13 +124,17 @@ class TestActivityFlow:
         mock_repo.count.return_value = 1
 
         with patch(
-            "fittrack.api.routes.transactions._get_repo", return_value=mock_repo,
+            "fittrack.api.routes.transactions._get_repo",
+            return_value=mock_repo,
         ):
             resp = client.get("/api/v1/transactions", headers=user_headers)
             assert resp.status_code == 200
 
     def test_leaderboard_ranking(
-        self, client: TestClient, _mock_repos: None, user_headers: dict[str, str],
+        self,
+        client: TestClient,
+        _mock_repos: None,
+        user_headers: dict[str, str],
     ) -> None:
         """GET /api/v1/leaderboards/{period} should return rankings."""
         mock_svc = MagicMock()

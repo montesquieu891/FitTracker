@@ -31,24 +31,18 @@ def _make_service(
     transaction_repo = MagicMock()
 
     user_repo.find_all.return_value = users or []
-    user_repo.count.side_effect = lambda filters=None: (
-        len([
-            u for u in (users or [])
-            if not filters or all(
-                u.get(k) == v for k, v in filters.items()
-            )
-        ])
+    user_repo.count.side_effect = lambda filters=None: len(
+        [u for u in (users or []) if not filters or all(u.get(k) == v for k, v in filters.items())]
     )
 
     activity_repo.find_all.return_value = activities or []
     drawing_repo.find_all.return_value = drawings or []
-    drawing_repo.count.side_effect = lambda filters=None: (
-        len([
-            d for d in (drawings or [])
-            if not filters or all(
-                d.get(k) == v for k, v in filters.items()
-            )
-        ])
+    drawing_repo.count.side_effect = lambda filters=None: len(
+        [
+            d
+            for d in (drawings or [])
+            if not filters or all(d.get(k) == v for k, v in filters.items())
+        ]
     )
     ticket_repo.find_all.return_value = tickets or []
 

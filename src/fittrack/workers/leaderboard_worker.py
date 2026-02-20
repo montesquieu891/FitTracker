@@ -60,9 +60,7 @@ class LeaderboardWorker:
 
         # Discover active tier codes
         active_tiers = self._get_active_tiers()
-        logger.info(
-            "Leaderboard worker: %d active tiers to process", len(active_tiers)
-        )
+        logger.info("Leaderboard worker: %d active tiers to process", len(active_tiers))
 
         # Also compute the global (no tier) leaderboard
         all_tier_codes: list[str | None] = [None, *active_tiers]
@@ -72,17 +70,13 @@ class LeaderboardWorker:
             for period in VALID_PERIODS:
                 try:
                     # _compute_live bypasses cache; we store the result
-                    rankings = self.leaderboard_service._compute_live(
-                        period, tier_code
-                    )
+                    rankings = self.leaderboard_service._compute_live(period, tier_code)
                     result.periods_processed += 1
                     result.entries_cached += len(rankings)
 
                     # Push to cache
                     if self.cache is not None:
-                        self.cache.set_leaderboard(
-                            period, tier_code, rankings, ttl=900
-                        )
+                        self.cache.set_leaderboard(period, tier_code, rankings, ttl=900)
                 except Exception as e:
                     msg = f"Error computing {period}/{tier_code}: {e}"
                     logger.error(msg, exc_info=True)

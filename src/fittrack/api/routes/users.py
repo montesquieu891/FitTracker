@@ -16,6 +16,7 @@ router = APIRouter(prefix="/api/v1/users", tags=["users"])
 
 def _get_repo() -> UserRepository:
     from fittrack.core.database import get_pool
+
     return UserRepository(pool=get_pool())
 
 

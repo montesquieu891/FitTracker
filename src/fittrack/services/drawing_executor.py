@@ -120,12 +120,8 @@ class DrawingExecutor:
                 "status": "pending",
                 "created_at": datetime.now(tz=UTC).isoformat(),
             }
-            self.fulfillment_repo.create(
-                data=fulfillment_data, new_id=fulfillment_id
-            )
-            fulfillments.append(
-                {"fulfillment_id": fulfillment_id, **fulfillment_data}
-            )
+            self.fulfillment_repo.create(data=fulfillment_data, new_id=fulfillment_id)
+            fulfillments.append({"fulfillment_id": fulfillment_id, **fulfillment_data})
 
         # Step 6: Update non-winning tickets with ticket numbers
         for entry in snapshot:
@@ -168,9 +164,7 @@ class DrawingExecutor:
 
         return result
 
-    def _create_snapshot(
-        self, tickets: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def _create_snapshot(self, tickets: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Create an immutable snapshot of tickets with sequential numbers.
 
         Tickets are shuffled deterministically (by ticket_id) and assigned
@@ -181,13 +175,15 @@ class DrawingExecutor:
 
         snapshot = []
         for i, ticket in enumerate(sorted_tickets, start=1):
-            snapshot.append({
-                "ticket_number": i,
-                "ticket_id": ticket.get("ticket_id", ""),
-                "user_id": ticket.get("user_id", ""),
-                "drawing_id": ticket.get("drawing_id", ""),
-                "is_winner": False,
-            })
+            snapshot.append(
+                {
+                    "ticket_number": i,
+                    "ticket_id": ticket.get("ticket_id", ""),
+                    "user_id": ticket.get("user_id", ""),
+                    "drawing_id": ticket.get("drawing_id", ""),
+                    "is_winner": False,
+                }
+            )
 
         return snapshot
 
@@ -212,15 +208,10 @@ class DrawingExecutor:
 
             for _ in range(quantity):
                 # Filter out users who already won
-                eligible = [
-                    e for e in available
-                    if e["user_id"] not in winners_user_ids
-                ]
+                eligible = [e for e in available if e["user_id"] not in winners_user_ids]
 
                 if not eligible:
-                    logger.warning(
-                        "Not enough eligible tickets for prize %s", prize_id
-                    )
+                    logger.warning("Not enough eligible tickets for prize %s", prize_id)
                     break
 
                 # CSPRNG selection
@@ -231,19 +222,18 @@ class DrawingExecutor:
                 winner_entry["is_winner"] = True
                 winners_user_ids.add(winner_entry["user_id"])
 
-                winners.append({
-                    "ticket_id": winner_entry["ticket_id"],
-                    "ticket_number": winner_entry["ticket_number"],
-                    "user_id": winner_entry["user_id"],
-                    "prize_id": prize_id,
-                    "prize_name": prize.get("name", ""),
-                    "prize_rank": prize.get("rank", 1),
-                })
+                winners.append(
+                    {
+                        "ticket_id": winner_entry["ticket_id"],
+                        "ticket_number": winner_entry["ticket_number"],
+                        "user_id": winner_entry["user_id"],
+                        "prize_id": prize_id,
+                        "prize_name": prize.get("name", ""),
+                        "prize_rank": prize.get("rank", 1),
+                    }
+                )
 
                 # Remove winner's ticket from available pool
-                available = [
-                    e for e in available
-                    if e["ticket_id"] != winner_entry["ticket_id"]
-                ]
+                available = [e for e in available if e["ticket_id"] != winner_entry["ticket_id"]]
 
         return winners

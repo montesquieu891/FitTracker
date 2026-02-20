@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import sys
+from typing import Any
 
 # Add src to path so fittrack imports work
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -49,12 +50,12 @@ def _connect() -> oracledb.Connection:
     return oracledb.connect(user=user, password=password, dsn=dsn)
 
 
-def _insert_row(cur: oracledb.Cursor, table: str, data: dict) -> None:
+def _insert_row(cur: oracledb.Cursor, table: str, data: dict[str, Any]) -> None:
     """Insert a single row into a table."""
     import datetime
 
     # Convert non-primitive values appropriately for Oracle
-    clean: dict = {}
+    clean: dict[str, Any] = {}
     for k, v in data.items():
         if isinstance(v, (dict, list)):
             clean[k] = json.dumps(v)

@@ -143,12 +143,15 @@ class AuthService:
             raise AuthError("Account is suspended", status_code=403)
 
         # Reset failed attempts on successful login
-        self.user_repo.update(user_id, {
-            "failed_login_attempts": 0,
-            "locked_until": None,
-            "last_login_at": datetime.now(tz=UTC),
-            "updated_at": datetime.now(tz=UTC),
-        })
+        self.user_repo.update(
+            user_id,
+            {
+                "failed_login_attempts": 0,
+                "locked_until": None,
+                "last_login_at": datetime.now(tz=UTC),
+                "updated_at": datetime.now(tz=UTC),
+            },
+        )
 
         # Generate tokens
         role = user.get("role", "user")
@@ -222,12 +225,15 @@ class AuthService:
         if not user:
             raise AuthError("User not found", status_code=404)
 
-        self.user_repo.update(user_id, {
-            "email_verified": 1,
-            "email_verified_at": datetime.now(tz=UTC),
-            "status": "active",
-            "updated_at": datetime.now(tz=UTC),
-        })
+        self.user_repo.update(
+            user_id,
+            {
+                "email_verified": 1,
+                "email_verified_at": datetime.now(tz=UTC),
+                "status": "active",
+                "updated_at": datetime.now(tz=UTC),
+            },
+        )
 
         return {"message": "Email verified successfully"}
 
@@ -236,10 +242,13 @@ class AuthService:
     def logout(self, session_id: str) -> dict[str, Any]:
         """Revoke a single session."""
         if self.session_repo:
-            self.session_repo.update(session_id, {
-                "revoked": 1,
-                "revoked_at": datetime.now(tz=UTC),
-            })
+            self.session_repo.update(
+                session_id,
+                {
+                    "revoked": 1,
+                    "revoked_at": datetime.now(tz=UTC),
+                },
+            )
         return {"message": "Logged out successfully"}
 
     def logout_all(self, user_id: str) -> dict[str, Any]:
@@ -250,10 +259,13 @@ class AuthService:
             for s in sessions:
                 sid = s.get("session_id")
                 if sid and not s.get("revoked"):
-                    self.session_repo.update(sid, {
-                        "revoked": 1,
-                        "revoked_at": now,
-                    })
+                    self.session_repo.update(
+                        sid,
+                        {
+                            "revoked": 1,
+                            "revoked_at": now,
+                        },
+                    )
         return {"message": "All sessions revoked"}
 
     # ── Forgot / Reset Password ─────────────────────────────────────
@@ -280,10 +292,13 @@ class AuthService:
         if not user:
             raise AuthError("User not found", status_code=404)
 
-        self.user_repo.update(user_id, {
-            "password_hash": hash_password(new_password),
-            "updated_at": datetime.now(tz=UTC),
-        })
+        self.user_repo.update(
+            user_id,
+            {
+                "password_hash": hash_password(new_password),
+                "updated_at": datetime.now(tz=UTC),
+            },
+        )
 
         # Revoke all sessions (force re-login)
         self.logout_all(user_id)
@@ -296,17 +311,12 @@ class AuthService:
     def _validate_age(date_of_birth: str) -> None:
         """Validate user is 18+. Raises AuthError if underage."""
         try:
-            dob = datetime.strptime(date_of_birth, "%Y-%m-%d").replace(
-                tzinfo=UTC
-            )
+            dob = datetime.strptime(date_of_birth, "%Y-%m-%d").replace(tzinfo=UTC)
         except ValueError as exc:
             raise AuthError("Invalid date of birth format (expected YYYY-MM-DD)") from exc
 
         today = datetime.now(tz=UTC)
-        age = (
-            today.year - dob.year
-            - ((today.month, today.day) < (dob.month, dob.day))
-        )
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
         if age < 18:
             raise AuthError("Must be 18 or older to register", status_code=403)
 
@@ -325,9 +335,7 @@ class AuthService:
         locked_until = user.get("locked_until")
         if locked_until:
             if isinstance(locked_until, str):
-                locked_until = datetime.fromisoformat(locked_until).replace(
-                    tzinfo=UTC
-                )
+                locked_until = datetime.fromisoformat(locked_until).replace(tzinfo=UTC)
             if isinstance(locked_until, datetime):
                 now = datetime.now(tz=UTC)
                 if locked_until.tzinfo is None:

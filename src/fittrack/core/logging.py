@@ -36,10 +36,7 @@ def redact_dict(data: dict[str, Any]) -> dict[str, Any]:
         elif isinstance(value, dict):
             result[key] = redact_dict(value)
         elif isinstance(value, list):
-            result[key] = [
-                redact_dict(item) if isinstance(item, dict) else item
-                for item in value
-            ]
+            result[key] = [redact_dict(item) if isinstance(item, dict) else item for item in value]
         else:
             result[key] = value
     return result
@@ -103,10 +100,9 @@ class JSONFormatter(logging.Formatter):
 
         # Add extra fields (redacted)
         extras = {
-            k: v for k, v in record.__dict__.items()
-            if k not in logging.LogRecord(
-                "", 0, "", 0, "", (), None
-            ).__dict__
+            k: v
+            for k, v in record.__dict__.items()
+            if k not in logging.LogRecord("", 0, "", 0, "", (), None).__dict__
             and k not in ("message", "correlation_id")
         }
         if extras:
@@ -135,7 +131,7 @@ class CorrelationFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         from fittrack.core.context import get_correlation_id
 
-        record.correlation_id = get_correlation_id()  # type: ignore[attr-defined]
+        record.correlation_id = get_correlation_id()  # noqa: F841
         return True
 
 

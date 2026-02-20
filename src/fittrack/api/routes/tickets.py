@@ -16,6 +16,7 @@ router = APIRouter(prefix="/api/v1/tickets", tags=["tickets"])
 
 def _get_repo() -> TicketRepository:
     from fittrack.core.database import get_pool
+
     return TicketRepository(pool=get_pool())
 
 

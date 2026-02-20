@@ -71,8 +71,10 @@ def execute_query(sql: str, params: dict[str, Any] | None = None) -> list[dict[s
             return [
                 {
                     k: (
-                        v.hex() if isinstance(v, bytes)
-                        else v.read() if isinstance(v, oracledb.LOB)
+                        v.hex()
+                        if isinstance(v, bytes)
+                        else v.read()
+                        if isinstance(v, oracledb.LOB)
                         else v
                     )
                     for k, v in dict(zip(columns, row, strict=True)).items()
@@ -90,7 +92,7 @@ def execute_dml(sql: str, params: dict[str, Any] | None = None) -> int:
         with conn.cursor() as cur:
             cur.execute(sql, params or {})
             conn.commit()
-            return cur.rowcount
+            return int(cur.rowcount)
     finally:
         conn.close()
 

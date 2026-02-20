@@ -10,9 +10,7 @@ from fastapi.testclient import TestClient
 class TestFulfillmentListRoute:
     """Test GET /api/v1/fulfillments (admin)."""
 
-    def test_list_requires_admin(
-        self, client: TestClient, user_headers: dict
-    ) -> None:
+    def test_list_requires_admin(self, client: TestClient, user_headers: dict) -> None:
         resp = client.get("/api/v1/fulfillments", headers=user_headers)
         assert resp.status_code == 403
 
@@ -26,9 +24,7 @@ class TestFulfillmentListRoute:
         mock_svc = MagicMock()
         mock_svc.list_fulfillments.return_value = {
             "items": [{"fulfillment_id": "f1", "status": "pending"}],
-            "pagination": {
-                "page": 1, "limit": 20, "total_items": 1, "total_pages": 1
-            },
+            "pagination": {"page": 1, "limit": 20, "total_items": 1, "total_pages": 1},
         }
         mock_factory.return_value = mock_svc
         resp = client.get("/api/v1/fulfillments", headers=admin_headers)
@@ -87,9 +83,7 @@ class TestNotifyRoute:
             "status": "winner_notified",
         }
         mock_factory.return_value = mock_svc
-        resp = client.post(
-            "/api/v1/fulfillments/f1/notify", headers=admin_headers
-        )
+        resp = client.post("/api/v1/fulfillments/f1/notify", headers=admin_headers)
         assert resp.status_code == 200
         assert resp.json()["status"] == "winner_notified"
 
@@ -136,9 +130,7 @@ class TestDeliverRoute:
             "status": "delivered",
         }
         mock_factory.return_value = mock_svc
-        resp = client.post(
-            "/api/v1/fulfillments/f1/deliver", headers=admin_headers
-        )
+        resp = client.post("/api/v1/fulfillments/f1/deliver", headers=admin_headers)
         assert resp.status_code == 200
         assert resp.json()["status"] == "delivered"
 
@@ -159,9 +151,7 @@ class TestForfeitRoute:
             "status": "forfeited",
         }
         mock_factory.return_value = mock_svc
-        resp = client.post(
-            "/api/v1/fulfillments/f1/forfeit", headers=admin_headers
-        )
+        resp = client.post("/api/v1/fulfillments/f1/forfeit", headers=admin_headers)
         assert resp.status_code == 200
         assert resp.json()["status"] == "forfeited"
 

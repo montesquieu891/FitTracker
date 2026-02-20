@@ -39,9 +39,7 @@ class TrackerService:
         """Get a provider client by name."""
         provider = self.providers.get(provider_name)
         if not provider:
-            raise TrackerError(
-                f"Unsupported provider: {provider_name}", status_code=400
-            )
+            raise TrackerError(f"Unsupported provider: {provider_name}", status_code=400)
         return provider
 
     # ── OAuth flow ──────────────────────────────────────────────────
@@ -60,8 +58,7 @@ class TrackerService:
         for conn in existing:
             if conn.get("provider") == provider_name:
                 raise TrackerError(
-                    f"Already connected to {provider_name}. "
-                    "Disconnect first to reconnect.",
+                    f"Already connected to {provider_name}. Disconnect first to reconnect.",
                     status_code=409,
                 )
 
@@ -83,9 +80,7 @@ class TrackerService:
         try:
             token_info: TokenInfo = provider.exchange_code(code, redirect_uri)
         except ProviderError as e:
-            raise TrackerError(
-                f"OAuth token exchange failed: {e.detail}", status_code=502
-            ) from e
+            raise TrackerError(f"OAuth token exchange failed: {e.detail}", status_code=502) from e
 
         # Determine if this is the user's first connection (make it primary)
         existing = self.connection_repo.find_by_user_id(user_id)
@@ -124,9 +119,7 @@ class TrackerService:
                 break
 
         if not target:
-            raise TrackerError(
-                f"No connection found for {provider_name}", status_code=404
-            )
+            raise TrackerError(f"No connection found for {provider_name}", status_code=404)
 
         # Revoke token if provider is available
         provider = self.providers.get(provider_name)
@@ -158,9 +151,7 @@ class TrackerService:
                 break
 
         if not target:
-            raise TrackerError(
-                f"No connection found for {provider_name}", status_code=404
-            )
+            raise TrackerError(f"No connection found for {provider_name}", status_code=404)
 
         connection_id = target.get("connection_id", "")
         self.connection_repo.update(
@@ -214,12 +205,15 @@ class TrackerService:
             decrypted = _decrypt_token(refresh_tok)
             new_tokens = provider.refresh_access_token(decrypted)
             conn_id = connection.get("connection_id", "")
-            self.connection_repo.update(conn_id, {
-                "access_token": _encrypt_token(new_tokens.access_token),
-                "refresh_token": _encrypt_token(new_tokens.refresh_token or decrypted),
-                "token_expires_at": new_tokens.token_expires_at,
-                "updated_at": datetime.now(tz=UTC),
-            })
+            self.connection_repo.update(
+                conn_id,
+                {
+                    "access_token": _encrypt_token(new_tokens.access_token),
+                    "refresh_token": _encrypt_token(new_tokens.refresh_token or decrypted),
+                    "token_expires_at": new_tokens.token_expires_at,
+                    "updated_at": datetime.now(tz=UTC),
+                },
+            )
             connection["access_token"] = _encrypt_token(new_tokens.access_token)
             connection["token_expires_at"] = new_tokens.token_expires_at
             logger.info("Refreshed token for connection %s", conn_id)

@@ -57,9 +57,7 @@ class MockFulfillmentRepo:
         return 0
 
 
-def _make_fulfillment(
-    status: str = "pending", **kwargs: Any
-) -> dict[str, Any]:
+def _make_fulfillment(status: str = "pending", **kwargs: Any) -> dict[str, Any]:
     return {
         "fulfillment_id": "f1",
         "ticket_id": "t1",
@@ -89,12 +87,15 @@ class TestStateTransitions:
 
     def test_notified_to_confirmed(self):
         svc = _make_service([_make_fulfillment("winner_notified")])
-        result = svc.confirm_address("f1", {
-            "street": "123 Main St",
-            "city": "Anytown",
-            "state": "CA",
-            "zip_code": "90210",
-        })
+        result = svc.confirm_address(
+            "f1",
+            {
+                "street": "123 Main St",
+                "city": "Anytown",
+                "state": "CA",
+                "zip_code": "90210",
+            },
+        )
         assert result["status"] == "address_confirmed"
         assert result["address_confirmed_at"]
 
@@ -105,12 +106,15 @@ class TestStateTransitions:
 
     def test_invalid_to_confirmed_recovery(self):
         svc = _make_service([_make_fulfillment("address_invalid")])
-        result = svc.confirm_address("f1", {
-            "street": "456 Oak Ave",
-            "city": "Other City",
-            "state": "NY",
-            "zip_code": "10001",
-        })
+        result = svc.confirm_address(
+            "f1",
+            {
+                "street": "456 Oak Ave",
+                "city": "Other City",
+                "state": "NY",
+                "zip_code": "10001",
+            },
+        )
         assert result["status"] == "address_confirmed"
 
     def test_confirmed_to_shipped(self):
@@ -167,9 +171,7 @@ class TestInvalidTransitions:
     def test_cannot_confirm_from_pending(self):
         svc = _make_service([_make_fulfillment("pending")])
         with pytest.raises(FulfillmentError, match="Cannot transition"):
-            svc.confirm_address("f1", {
-                "street": "x", "city": "x", "state": "x", "zip_code": "x"
-            })
+            svc.confirm_address("f1", {"street": "x", "city": "x", "state": "x", "zip_code": "x"})
 
     def test_cannot_transition_from_delivered(self):
         svc = _make_service([_make_fulfillment("delivered")])
@@ -199,30 +201,22 @@ class TestAddressValidation:
     def test_missing_street(self):
         svc = _make_service([_make_fulfillment("winner_notified")])
         with pytest.raises(FulfillmentError, match="street"):
-            svc.confirm_address("f1", {
-                "city": "x", "state": "x", "zip_code": "x"
-            })
+            svc.confirm_address("f1", {"city": "x", "state": "x", "zip_code": "x"})
 
     def test_missing_city(self):
         svc = _make_service([_make_fulfillment("winner_notified")])
         with pytest.raises(FulfillmentError, match="city"):
-            svc.confirm_address("f1", {
-                "street": "x", "state": "x", "zip_code": "x"
-            })
+            svc.confirm_address("f1", {"street": "x", "state": "x", "zip_code": "x"})
 
     def test_missing_state(self):
         svc = _make_service([_make_fulfillment("winner_notified")])
         with pytest.raises(FulfillmentError, match="state"):
-            svc.confirm_address("f1", {
-                "street": "x", "city": "x", "zip_code": "x"
-            })
+            svc.confirm_address("f1", {"street": "x", "city": "x", "zip_code": "x"})
 
     def test_missing_zip_code(self):
         svc = _make_service([_make_fulfillment("winner_notified")])
         with pytest.raises(FulfillmentError, match="zip_code"):
-            svc.confirm_address("f1", {
-                "street": "x", "city": "x", "state": "x"
-            })
+            svc.confirm_address("f1", {"street": "x", "city": "x", "state": "x"})
 
     def test_empty_address_rejected(self):
         svc = _make_service([_make_fulfillment("winner_notified")])
@@ -272,10 +266,7 @@ class TestFulfillmentQueries:
             svc.get_fulfillment("nope")
 
     def test_list_fulfillments_all(self):
-        items = [
-            {**_make_fulfillment("pending"), "fulfillment_id": f"f{i}"}
-            for i in range(5)
-        ]
+        items = [{**_make_fulfillment("pending"), "fulfillment_id": f"f{i}"} for i in range(5)]
         svc = _make_service(items)
         result = svc.list_fulfillments()
         assert result["pagination"]["total_items"] == 5
@@ -299,10 +290,7 @@ class TestFulfillmentQueries:
         assert result["pagination"]["total_items"] == 1
 
     def test_list_pagination(self):
-        items = [
-            {**_make_fulfillment("pending"), "fulfillment_id": f"f{i}"}
-            for i in range(10)
-        ]
+        items = [{**_make_fulfillment("pending"), "fulfillment_id": f"f{i}"} for i in range(10)]
         svc = _make_service(items)
         result = svc.list_fulfillments(page=2, limit=3)
         assert len(result["items"]) == 3
@@ -315,18 +303,14 @@ class TestFulfillmentQueries:
 class TestTimeoutChecks:
     def test_warning_after_7_days(self):
         notified = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
-        f = _make_fulfillment(
-            "winner_notified", notified_at=notified.isoformat()
-        )
+        f = _make_fulfillment("winner_notified", notified_at=notified.isoformat())
         svc = _make_service([f])
         now = notified + timedelta(days=ADDRESS_CONFIRM_WARNING_DAYS)
         assert svc.check_confirmation_warning("f1", now) is True
 
     def test_no_warning_before_7_days(self):
         notified = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
-        f = _make_fulfillment(
-            "winner_notified", notified_at=notified.isoformat()
-        )
+        f = _make_fulfillment("winner_notified", notified_at=notified.isoformat())
         svc = _make_service([f])
         now = notified + timedelta(days=6)
         assert svc.check_confirmation_warning("f1", now) is False
@@ -342,18 +326,14 @@ class TestTimeoutChecks:
 
     def test_forfeit_after_14_days(self):
         notified = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
-        f = _make_fulfillment(
-            "winner_notified", notified_at=notified.isoformat()
-        )
+        f = _make_fulfillment("winner_notified", notified_at=notified.isoformat())
         svc = _make_service([f])
         now = notified + timedelta(days=ADDRESS_CONFIRM_FORFEIT_DAYS)
         assert svc.check_forfeit_timeout("f1", now) is True
 
     def test_no_forfeit_before_14_days(self):
         notified = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
-        f = _make_fulfillment(
-            "winner_notified", notified_at=notified.isoformat()
-        )
+        f = _make_fulfillment("winner_notified", notified_at=notified.isoformat())
         svc = _make_service([f])
         now = notified + timedelta(days=13)
         assert svc.check_forfeit_timeout("f1", now) is False

@@ -56,6 +56,7 @@ class TestNormalizeActivity:
         raw = self._make_raw(metrics={"step_count": 5000, "distance_km": 3.5})
         result = normalize_activity(raw, "user1", "conn1")
         import json
+
         parsed = json.loads(result["metrics"])
         assert parsed["step_count"] == 5000
         assert parsed["distance_km"] == 3.5
@@ -86,9 +87,7 @@ class TestDetectDuplicate:
             activity_type="steps",
             start_time=datetime(2026, 1, 15, 8, 0, tzinfo=UTC),
         )
-        existing = [
-            {"activity_id": "act1", "external_id": "ext_001", "user_id": "user1"}
-        ]
+        existing = [{"activity_id": "act1", "external_id": "ext_001", "user_id": "user1"}]
         assert detect_duplicate(raw, "user1", existing) == "act1"
 
     def test_different_external_id_not_duplicate(self):
@@ -98,9 +97,7 @@ class TestDetectDuplicate:
             activity_type="steps",
             start_time=datetime(2026, 1, 15, 8, 0, tzinfo=UTC),
         )
-        existing = [
-            {"activity_id": "act1", "external_id": "ext_001", "user_id": "user1"}
-        ]
+        existing = [{"activity_id": "act1", "external_id": "ext_001", "user_id": "user1"}]
         assert detect_duplicate(raw, "user1", existing) is None
 
     def test_same_type_overlapping_time_is_duplicate(self):
@@ -150,9 +147,7 @@ class TestDetectDuplicate:
             activity_type="steps",
             start_time=datetime(2026, 1, 15, 8, 0, tzinfo=UTC),
         )
-        existing = [
-            {"activity_id": "act1", "external_id": "ext_001", "user_id": "user2"}
-        ]
+        existing = [{"activity_id": "act1", "external_id": "ext_001", "user_id": "user2"}]
         assert detect_duplicate(raw, "user1", existing) is None
 
     def test_different_type_not_duplicate(self):
@@ -242,9 +237,7 @@ class TestResolveMultiTrackerConflict:
                 "created_at": "2026-01-15T01:00:00",
             },
         ]
-        result = resolve_multi_tracker_conflict(
-            activities, primary_provider="google_fit"
-        )
+        result = resolve_multi_tracker_conflict(activities, primary_provider="google_fit")
         assert result["activity_id"] == "a2"
 
     def test_most_detailed_wins_without_primary(self):

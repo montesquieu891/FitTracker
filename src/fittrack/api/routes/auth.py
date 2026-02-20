@@ -191,4 +191,5 @@ def get_me(
     user.pop("password_hash", None)
     user.pop("failed_login_attempts", None)
     user.pop("locked_until", None)
-    return user
+    result: dict[str, Any] = user
+    return result

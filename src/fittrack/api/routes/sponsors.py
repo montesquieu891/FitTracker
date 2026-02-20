@@ -16,6 +16,7 @@ router = APIRouter(prefix="/api/v1/sponsors", tags=["sponsors"])
 
 def _get_repo() -> SponsorRepository:
     from fittrack.core.database import get_pool
+
     return SponsorRepository(pool=get_pool())
 
 

@@ -115,11 +115,13 @@ class TestWorkerRun:
 
     def test_close_sales_at_t_minus_5(self):
         draw_time = datetime(2026, 3, 1, 18, 0, tzinfo=UTC)
-        drawings = [{
-            "drawing_id": "d1",
-            "status": "open",
-            "drawing_time": draw_time.isoformat(),
-        }]
+        drawings = [
+            {
+                "drawing_id": "d1",
+                "status": "open",
+                "drawing_time": draw_time.isoformat(),
+            }
+        ]
         svc = MockDrawingService(drawings)
         executor = MockDrawingExecutor()
         worker = DrawingWorker(drawing_service=svc, drawing_executor=executor)
@@ -131,11 +133,13 @@ class TestWorkerRun:
 
     def test_no_close_before_t_minus_5(self):
         draw_time = datetime(2026, 3, 1, 18, 0, tzinfo=UTC)
-        drawings = [{
-            "drawing_id": "d1",
-            "status": "open",
-            "drawing_time": draw_time.isoformat(),
-        }]
+        drawings = [
+            {
+                "drawing_id": "d1",
+                "status": "open",
+                "drawing_time": draw_time.isoformat(),
+            }
+        ]
         svc = MockDrawingService(drawings)
         executor = MockDrawingExecutor()
         worker = DrawingWorker(drawing_service=svc, drawing_executor=executor)
@@ -146,11 +150,13 @@ class TestWorkerRun:
 
     def test_execute_ready_drawing(self):
         draw_time = datetime(2026, 3, 1, 18, 0, tzinfo=UTC)
-        drawings = [{
-            "drawing_id": "d1",
-            "status": "closed",
-            "drawing_time": draw_time.isoformat(),
-        }]
+        drawings = [
+            {
+                "drawing_id": "d1",
+                "status": "closed",
+                "drawing_time": draw_time.isoformat(),
+            }
+        ]
         svc = MockDrawingService(drawings)
         executor = MockDrawingExecutor()
         worker = DrawingWorker(drawing_service=svc, drawing_executor=executor)
@@ -162,11 +168,13 @@ class TestWorkerRun:
 
     def test_no_execute_before_draw_time(self):
         draw_time = datetime(2026, 3, 1, 18, 0, tzinfo=UTC)
-        drawings = [{
-            "drawing_id": "d1",
-            "status": "closed",
-            "drawing_time": draw_time.isoformat(),
-        }]
+        drawings = [
+            {
+                "drawing_id": "d1",
+                "status": "closed",
+                "drawing_time": draw_time.isoformat(),
+            }
+        ]
         svc = MockDrawingService(drawings)
         executor = MockDrawingExecutor()
         worker = DrawingWorker(drawing_service=svc, drawing_executor=executor)
@@ -200,11 +208,13 @@ class TestWorkerRun:
 
     def test_execution_error_captured(self):
         draw_time = datetime(2026, 3, 1, 18, 0, tzinfo=UTC)
-        drawings = [{
-            "drawing_id": "d1",
-            "status": "closed",
-            "drawing_time": draw_time.isoformat(),
-        }]
+        drawings = [
+            {
+                "drawing_id": "d1",
+                "status": "closed",
+                "drawing_time": draw_time.isoformat(),
+            }
+        ]
         svc = MockDrawingService(drawings)
         executor = MockDrawingExecutor()
         executor._error = "boom"
@@ -217,11 +227,13 @@ class TestWorkerRun:
 
     def test_close_error_captured(self):
         draw_time = datetime(2026, 3, 1, 18, 0, tzinfo=UTC)
-        drawings = [{
-            "drawing_id": "d1",
-            "status": "open",
-            "drawing_time": draw_time.isoformat(),
-        }]
+        drawings = [
+            {
+                "drawing_id": "d1",
+                "status": "open",
+                "drawing_time": draw_time.isoformat(),
+            }
+        ]
         svc = MockDrawingService(drawings)
         svc._close_error = "close failed"
         executor = MockDrawingExecutor()

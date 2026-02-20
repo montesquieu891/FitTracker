@@ -79,9 +79,7 @@ class DrawingService:
         # Calculate ticket sales close time
         ticket_sales_close = None
         if drawing_time is not None:
-            ticket_sales_close = drawing_time - timedelta(
-                minutes=TICKET_SALES_CLOSE_MINUTES_BEFORE
-            )
+            ticket_sales_close = drawing_time - timedelta(minutes=TICKET_SALES_CLOSE_MINUTES_BEFORE)
 
         from fittrack.repositories.base import BaseRepository
 
@@ -106,9 +104,7 @@ class DrawingService:
 
     # ── Lifecycle transitions ───────────────────────────────────────
 
-    def transition_status(
-        self, drawing_id: str, new_status: str
-    ) -> dict[str, Any]:
+    def transition_status(self, drawing_id: str, new_status: str) -> dict[str, Any]:
         """Transition a drawing to a new status."""
         if new_status not in DRAWING_STATUSES:
             raise DrawingError(f"Invalid status: {new_status}")
@@ -122,8 +118,7 @@ class DrawingService:
 
         if new_status not in allowed:
             raise DrawingError(
-                f"Cannot transition from '{current}' to '{new_status}'. "
-                f"Allowed: {allowed}"
+                f"Cannot transition from '{current}' to '{new_status}'. Allowed: {allowed}"
             )
 
         update_data: dict[str, Any] = {"status": new_status}
@@ -132,7 +127,8 @@ class DrawingService:
 
         self.drawing_repo.update(drawing_id, data=update_data)
         drawing.update(update_data)
-        return drawing
+        result: dict[str, Any] = drawing
+        return result
 
     def schedule_drawing(self, drawing_id: str) -> dict[str, Any]:
         """Move drawing from draft to scheduled."""
@@ -166,7 +162,8 @@ class DrawingService:
         prizes = self.prize_repo.find_by_field("drawing_id", drawing_id)
         drawing["prizes"] = prizes
         drawing["total_tickets"] = self.ticket_repo.count_by_drawing(drawing_id)
-        return drawing
+        result: dict[str, Any] = drawing
+        return result
 
     def list_drawings(
         self,
@@ -228,9 +225,7 @@ class DrawingService:
 
     # ── Ticket sales window ─────────────────────────────────────────
 
-    def is_ticket_sales_open(
-        self, drawing_id: str, now: datetime | None = None
-    ) -> bool:
+    def is_ticket_sales_open(self, drawing_id: str, now: datetime | None = None) -> bool:
         """Check if ticket sales are currently open for a drawing."""
         if now is None:
             now = datetime.now(tz=UTC)
@@ -255,9 +250,7 @@ class DrawingService:
 
         return True
 
-    def check_sales_should_close(
-        self, drawing_id: str, now: datetime | None = None
-    ) -> bool:
+    def check_sales_should_close(self, drawing_id: str, now: datetime | None = None) -> bool:
         """Check if ticket sales should auto-close (T-5 minutes)."""
         if now is None:
             now = datetime.now(tz=UTC)
@@ -279,16 +272,12 @@ class DrawingService:
         if isinstance(drawing_time, datetime):
             if drawing_time.tzinfo is None:
                 drawing_time = drawing_time.replace(tzinfo=UTC)
-            close_time = drawing_time - timedelta(
-                minutes=TICKET_SALES_CLOSE_MINUTES_BEFORE
-            )
+            close_time = drawing_time - timedelta(minutes=TICKET_SALES_CLOSE_MINUTES_BEFORE)
             return now >= close_time
 
         return False
 
-    def check_drawing_ready(
-        self, drawing_id: str, now: datetime | None = None
-    ) -> bool:
+    def check_drawing_ready(self, drawing_id: str, now: datetime | None = None) -> bool:
         """Check if a drawing is ready to execute (past drawing_time)."""
         if now is None:
             now = datetime.now(tz=UTC)

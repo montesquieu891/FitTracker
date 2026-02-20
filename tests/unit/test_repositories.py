@@ -26,11 +26,13 @@ def cursor(conn: MockConnection) -> MockCursor:
 
 # ── User Repository ─────────────────────────────────────────────────
 
+
 class TestUserRepository:
     """Test user-specific repository methods."""
 
     def _make_repo(self, pool: MockPool):  # type: ignore[no-untyped-def]
         from fittrack.repositories.user_repository import UserRepository
+
         return UserRepository(pool=pool)
 
     def test_table_name(self, pool: MockPool) -> None:
@@ -77,11 +79,13 @@ class TestUserRepository:
 
 # ── Profile Repository ──────────────────────────────────────────────
 
+
 class TestProfileRepository:
     """Test profile-specific repository methods."""
 
     def _make_repo(self, pool: MockPool):  # type: ignore[no-untyped-def]
         from fittrack.repositories.profile_repository import ProfileRepository
+
         return ProfileRepository(pool=pool)
 
     def test_table_name(self, pool: MockPool) -> None:
@@ -116,11 +120,13 @@ class TestProfileRepository:
 
 # ── Activity Repository ─────────────────────────────────────────────
 
+
 class TestActivityRepository:
     """Test activity-specific repository methods."""
 
     def _make_repo(self, pool: MockPool):  # type: ignore[no-untyped-def]
         from fittrack.repositories.activity_repository import ActivityRepository
+
         return ActivityRepository(pool=pool)
 
     def test_table_name(self, pool: MockPool) -> None:
@@ -158,11 +164,13 @@ class TestActivityRepository:
 
 # ── Connection Repository ───────────────────────────────────────────
 
+
 class TestConnectionRepository:
     """Test tracker connection repository methods."""
 
     def _make_repo(self, pool: MockPool):  # type: ignore[no-untyped-def]
         from fittrack.repositories.connection_repository import ConnectionRepository
+
         return ConnectionRepository(pool=pool)
 
     def test_table_name(self, pool: MockPool) -> None:
@@ -184,11 +192,13 @@ class TestConnectionRepository:
 
 # ── Transaction Repository ──────────────────────────────────────────
 
+
 class TestTransactionRepository:
     """Test point transaction repository methods."""
 
     def _make_repo(self, pool: MockPool):  # type: ignore[no-untyped-def]
         from fittrack.repositories.transaction_repository import TransactionRepository
+
         return TransactionRepository(pool=pool)
 
     def test_table_name(self, pool: MockPool) -> None:
@@ -219,11 +229,13 @@ class TestTransactionRepository:
 
 # ── Drawing Repository ──────────────────────────────────────────────
 
+
 class TestDrawingRepository:
     """Test drawing repository methods."""
 
     def _make_repo(self, pool: MockPool):  # type: ignore[no-untyped-def]
         from fittrack.repositories.drawing_repository import DrawingRepository
+
         return DrawingRepository(pool=pool)
 
     def test_table_name(self, pool: MockPool) -> None:
@@ -257,11 +269,13 @@ class TestDrawingRepository:
 
 # ── Ticket Repository ───────────────────────────────────────────────
 
+
 class TestTicketRepository:
     """Test ticket repository methods."""
 
     def _make_repo(self, pool: MockPool):  # type: ignore[no-untyped-def]
         from fittrack.repositories.ticket_repository import TicketRepository
+
         return TicketRepository(pool=pool)
 
     def test_table_name(self, pool: MockPool) -> None:
@@ -298,11 +312,13 @@ class TestTicketRepository:
 
 # ── Prize Repository ────────────────────────────────────────────────
 
+
 class TestPrizeRepository:
     """Test prize repository methods."""
 
     def _make_repo(self, pool: MockPool):  # type: ignore[no-untyped-def]
         from fittrack.repositories.prize_repository import PrizeRepository
+
         return PrizeRepository(pool=pool)
 
     def test_table_name(self, pool: MockPool) -> None:
@@ -324,11 +340,13 @@ class TestPrizeRepository:
 
 # ── Sponsor Repository ──────────────────────────────────────────────
 
+
 class TestSponsorRepository:
     """Test sponsor repository methods."""
 
     def _make_repo(self, pool: MockPool):  # type: ignore[no-untyped-def]
         from fittrack.repositories.sponsor_repository import SponsorRepository
+
         return SponsorRepository(pool=pool)
 
     def test_table_name(self, pool: MockPool) -> None:
@@ -349,11 +367,13 @@ class TestSponsorRepository:
 
 # ── Fulfillment Repository ──────────────────────────────────────────
 
+
 class TestFulfillmentRepository:
     """Test fulfillment repository methods."""
 
     def _make_repo(self, pool: MockPool):  # type: ignore[no-untyped-def]
         from fittrack.repositories.fulfillment_repository import FulfillmentRepository
+
         return FulfillmentRepository(pool=pool)
 
     def test_table_name(self, pool: MockPool) -> None:

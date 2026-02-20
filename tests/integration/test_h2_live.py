@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Any
 
 import pytest
 
@@ -34,9 +33,7 @@ def _oracle_available() -> bool:
     try:
         import oracledb
 
-        conn = oracledb.connect(
-            user=_ORACLE_USER, password=_ORACLE_PASSWORD, dsn=_ORACLE_DSN
-        )
+        conn = oracledb.connect(user=_ORACLE_USER, password=_ORACLE_PASSWORD, dsn=_ORACLE_DSN)
         conn.close()
         return True
     except Exception:
@@ -59,9 +56,7 @@ def oracle_conn():
         pytest.skip(_SKIP_REASON)
     import oracledb
 
-    conn = oracledb.connect(
-        user=_ORACLE_USER, password=_ORACLE_PASSWORD, dsn=_ORACLE_DSN
-    )
+    conn = oracledb.connect(user=_ORACLE_USER, password=_ORACLE_PASSWORD, dsn=_ORACLE_DSN)
     yield conn
     conn.close()
 
@@ -94,7 +89,6 @@ class TestH2HealthWithRealDB:
 
     def test_health_live(self) -> None:
         """GET /health/live returns 200 regardless of DB."""
-        from unittest.mock import patch
 
         from fastapi.testclient import TestClient
 
@@ -142,9 +136,7 @@ class TestH2MigrationsIdempotent:
     def test_tables_exist(self, oracle_conn) -> None:
         """After migration, expected tables are present."""
         with oracle_conn.cursor() as cur:
-            cur.execute(
-                "SELECT table_name FROM user_tables ORDER BY table_name"
-            )
+            cur.execute("SELECT table_name FROM user_tables ORDER BY table_name")
             tables = {row[0].upper() for row in cur.fetchall()}
 
         expected = {"USERS", "PROFILES", "ACTIVITIES", "DRAWINGS", "TICKETS"}
@@ -210,9 +202,7 @@ class TestH2AuthReal:
 
     def test_register_login_me(self, oracle_pool, oracle_conn) -> None:
         """Full register → login → /me round-trip."""
-        from unittest.mock import patch
 
-        import fittrack.core.database as db_mod
         from fittrack.repositories.session_repository import SessionRepository
         from fittrack.repositories.user_repository import UserRepository
         from fittrack.services.auth import AuthService

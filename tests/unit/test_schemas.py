@@ -281,9 +281,7 @@ class TestFulfillmentSchemas:
     def test_fulfillment_create(self) -> None:
         from fittrack.api.schemas.fulfillments import FulfillmentCreate
 
-        f = FulfillmentCreate(
-            ticket_id="t1", prize_id="p1", user_id="u1"
-        )
+        f = FulfillmentCreate(ticket_id="t1", prize_id="p1", user_id="u1")
         assert f.status == "pending"
 
     def test_fulfillment_update_valid(self) -> None:

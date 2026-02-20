@@ -71,11 +71,9 @@ def detect_duplicate(
     """
     for existing in existing_activities:
         # Rule 1: same external_id
-        if (
-            existing.get("external_id") == raw.external_id
-            and existing.get("user_id") == user_id
-        ):
-            return existing.get("activity_id", "unknown")
+        if existing.get("external_id") == raw.external_id and existing.get("user_id") == user_id:
+            result: str = existing.get("activity_id", "unknown")
+            return result
 
         # Rule 2: same type + overlapping time
         if (
@@ -88,7 +86,8 @@ def detect_duplicate(
                 existing.get("end_time"),
             )
         ):
-            return existing.get("activity_id", "unknown")
+            result2: str = existing.get("activity_id", "unknown")
+            return result2
 
     return None
 
@@ -114,9 +113,9 @@ def _times_overlap(
         end2 = datetime.fromisoformat(end2)
 
     if end1 is None or end2 is None:
-        return start1 == start2
+        return bool(start1 == start2)
 
-    return start1 < end2 and start2 < end1
+    return bool(start1 < end2 and start2 < end1)
 
 
 def resolve_multi_tracker_conflict(

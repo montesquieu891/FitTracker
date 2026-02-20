@@ -11,13 +11,17 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from typing import TYPE_CHECKING
 
 from fittrack.core.logging import setup_logging
+
+if TYPE_CHECKING:
+    import oracledb
 
 logger = logging.getLogger(__name__)
 
 
-def _get_pool():
+def _get_pool() -> oracledb.ConnectionPool:
     """Create and return an oracledb connection pool."""
     import oracledb
 
@@ -132,8 +136,8 @@ def run_drawing() -> int:
     from fittrack.repositories.fulfillment_repository import FulfillmentRepository
     from fittrack.repositories.prize_repository import PrizeRepository
     from fittrack.repositories.ticket_repository import TicketRepository
-    from fittrack.services.drawings import DrawingService
     from fittrack.services.drawing_executor import DrawingExecutor
+    from fittrack.services.drawings import DrawingService
     from fittrack.workers.drawing_worker import DrawingWorker
 
     try:

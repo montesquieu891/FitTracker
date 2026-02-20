@@ -47,7 +47,11 @@ class TestComputeTierCode:
         ],
     )
     def test_compute(
-        self, sex: str, age: str, level: str, expected: str,
+        self,
+        sex: str,
+        age: str,
+        level: str,
+        expected: str,
     ) -> None:
         assert compute_tier_code(sex, age, level) == expected
 
@@ -146,8 +150,13 @@ class TestEnumerateTiers:
 
     def test_all_required_keys(self) -> None:
         keys = {
-            "tier_code", "display_name", "sex", "sex_name",
-            "age_bracket", "fitness_level", "fitness_level_name",
+            "tier_code",
+            "display_name",
+            "sex",
+            "sex_name",
+            "age_bracket",
+            "fitness_level",
+            "fitness_level_name",
         }
         for tier in enumerate_tiers():
             assert keys.issubset(tier.keys())
@@ -237,7 +246,9 @@ class TestTierRoutes:
         assert "user_count" not in data["items"][0]
 
     def test_list_tiers_with_counts(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
     ) -> None:
         # Each tier queries count — mock returns 0
         set_mock_query_result(mock_cursor, ["cnt"], [(0,)])
@@ -248,7 +259,9 @@ class TestTierRoutes:
         assert "user_count" in data["items"][0]
 
     def test_get_tier_valid(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
     ) -> None:
         set_mock_query_result(mock_cursor, ["cnt"], [(7,)])
         resp = client.get("/api/v1/tiers/M-18-29-BEG")
@@ -263,7 +276,9 @@ class TestTierRoutes:
         assert resp.status_code == 404
 
     def test_get_tier_female_advanced(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
     ) -> None:
         set_mock_query_result(mock_cursor, ["cnt"], [(3,)])
         resp = client.get("/api/v1/tiers/F-40-49-ADV")
@@ -273,13 +288,19 @@ class TestTierRoutes:
         assert data["display_name"] == "Female · 40-49 · Advanced"
 
     def test_tier_list_items_have_required_keys(
-        self, client: TestClient,
+        self,
+        client: TestClient,
     ) -> None:
         resp = client.get("/api/v1/tiers")
         data = resp.json()
         required = {
-            "tier_code", "display_name", "sex", "sex_name",
-            "age_bracket", "fitness_level", "fitness_level_name",
+            "tier_code",
+            "display_name",
+            "sex",
+            "sex_name",
+            "age_bracket",
+            "fitness_level",
+            "fitness_level_name",
         }
         for item in data["items"]:
             assert required.issubset(item.keys())

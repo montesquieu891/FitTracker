@@ -91,9 +91,7 @@ def setup_middleware(app: FastAPI) -> None:
         request: Request, call_next
     ):
         # ── Correlation ID ──────────────────────────────────────
-        correlation_id = request.headers.get(
-            "x-correlation-id", uuid.uuid4().hex[:12]
-        )
+        correlation_id = request.headers.get("x-correlation-id", uuid.uuid4().hex[:12])
         set_correlation_id(correlation_id)
 
         # ── Dev endpoint guard ──────────────────────────────────
@@ -150,7 +148,7 @@ def _get_cors_origins(settings: Any) -> list[str]:
     if settings is None:
         return ["*"]
     if hasattr(settings, "cors_origin_list"):
-        return settings.cors_origin_list
+        return list(settings.cors_origin_list)
     return ["*"] if not settings.is_production else []
 
 

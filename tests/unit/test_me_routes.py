@@ -15,7 +15,9 @@ class TestMeRoutes:
     """Test /api/v1/users/me endpoint."""
 
     def test_get_me_returns_user_with_profile(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         """GET /api/v1/users/me returns merged user + profile."""
@@ -37,20 +39,34 @@ class TestMeRoutes:
         assert resp.status_code == 401
 
     def test_get_me_profile_returns_profile(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         """GET /api/v1/users/me/profile returns user's profile."""
         set_mock_query_result(
             mock_cursor,
             [
-                "profile_id", "user_id", "display_name", "tier_code",
-                "biological_sex", "age_bracket", "fitness_level",
+                "profile_id",
+                "user_id",
+                "display_name",
+                "tier_code",
+                "biological_sex",
+                "age_bracket",
+                "fitness_level",
             ],
-            [(
-                "p1", "test-user", "Test User", "M-18-29-BEG",
-                "male", "18-29", "beginner",
-            )],
+            [
+                (
+                    "p1",
+                    "test-user",
+                    "Test User",
+                    "M-18-29-BEG",
+                    "male",
+                    "18-29",
+                    "beginner",
+                )
+            ],
         )
         resp = client.get("/api/v1/users/me/profile", headers=user_headers)
         assert resp.status_code == 200
@@ -58,7 +74,9 @@ class TestMeRoutes:
         assert data["profile_id"] == "p1"
 
     def test_get_me_profile_404_when_none(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(mock_cursor, ["profile_id"], [])
@@ -85,7 +103,9 @@ class TestMeProfileUpsert:
         }
 
     def test_upsert_creates_when_no_existing(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         """PUT creates a new profile when none exists."""
@@ -104,17 +124,22 @@ class TestMeProfileUpsert:
 
     def test_upsert_requires_auth(self, client: TestClient) -> None:
         resp = client.put(
-            "/api/v1/users/me/profile", json=self._profile_body(),
+            "/api/v1/users/me/profile",
+            json=self._profile_body(),
         )
         assert resp.status_code == 401
 
     def test_upsert_invalid_sex_422(
-        self, client: TestClient, user_headers: dict[str, str],
+        self,
+        client: TestClient,
+        user_headers: dict[str, str],
     ) -> None:
         body = self._profile_body()
         body["biological_sex"] = "other"
         resp = client.put(
-            "/api/v1/users/me/profile", json=body, headers=user_headers,
+            "/api/v1/users/me/profile",
+            json=body,
+            headers=user_headers,
         )
         assert resp.status_code == 422
 
@@ -130,7 +155,9 @@ class TestMeProfilePatch:
         assert resp.status_code == 401
 
     def test_patch_404_when_no_profile(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(mock_cursor, ["profile_id"], [])
@@ -142,7 +169,9 @@ class TestMeProfilePatch:
         assert resp.status_code == 404
 
     def test_patch_empty_body_400(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         # find_by_user_id returns a profile
@@ -163,12 +192,15 @@ class TestMeProfileComplete:
     """Test GET /api/v1/users/me/profile/complete."""
 
     def test_complete_check_no_profile(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         set_mock_query_result(mock_cursor, ["profile_id"], [])
         resp = client.get(
-            "/api/v1/users/me/profile/complete", headers=user_headers,
+            "/api/v1/users/me/profile/complete",
+            headers=user_headers,
         )
         assert resp.status_code == 200
         assert resp.json()["profile_complete"] is False
@@ -185,18 +217,32 @@ class TestPublicProfile:
     """Test GET /api/v1/users/{id}/public."""
 
     def test_public_profile_200(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
     ) -> None:
         set_mock_query_result(
             mock_cursor,
             [
-                "profile_id", "user_id", "display_name", "tier_code",
-                "biological_sex", "age_bracket", "fitness_level",
+                "profile_id",
+                "user_id",
+                "display_name",
+                "tier_code",
+                "biological_sex",
+                "age_bracket",
+                "fitness_level",
             ],
-            [(
-                "p1", "u1", "Jane Doe", "F-30-39-INT",
-                "female", "30-39", "intermediate",
-            )],
+            [
+                (
+                    "p1",
+                    "u1",
+                    "Jane Doe",
+                    "F-30-39-INT",
+                    "female",
+                    "30-39",
+                    "intermediate",
+                )
+            ],
         )
         resp = client.get("/api/v1/users/u1/public")
         assert resp.status_code == 200
@@ -209,7 +255,9 @@ class TestPublicProfile:
         assert "password_hash" not in data
 
     def test_public_profile_404(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
     ) -> None:
         set_mock_query_result(mock_cursor, ["profile_id"], [])
         resp = client.get("/api/v1/users/nonexistent/public")

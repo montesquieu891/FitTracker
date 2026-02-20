@@ -13,7 +13,9 @@ class TestListConnections:
         assert resp.status_code == 401
 
     def test_list_connections(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         # JWT lookup then connection_repo.find_by_user_id
@@ -31,13 +33,13 @@ class TestListConnections:
 
 class TestInitiateOAuth:
     def test_requires_auth(self, client: TestClient) -> None:
-        resp = client.post(
-            "/api/v1/connections/google_fit/initiate?redirect_uri=http://cb"
-        )
+        resp = client.post("/api/v1/connections/google_fit/initiate?redirect_uri=http://cb")
         assert resp.status_code == 401
 
     def test_unsupported_provider(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         resp = client.post(
@@ -47,7 +49,9 @@ class TestInitiateOAuth:
         assert resp.status_code == 400
 
     def test_initiate_google_fit(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         # find_by_user_id returns empty (no existing connections)
@@ -65,24 +69,26 @@ class TestInitiateOAuth:
 class TestCompleteOAuth:
     def test_requires_auth(self, client: TestClient) -> None:
         resp = client.post(
-            "/api/v1/connections/google_fit/callback"
-            "?code=auth_code&redirect_uri=http://cb"
+            "/api/v1/connections/google_fit/callback?code=auth_code&redirect_uri=http://cb"
         )
         assert resp.status_code == 401
 
     def test_unsupported_provider(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         resp = client.post(
-            "/api/v1/connections/unknown/callback"
-            "?code=auth_code&redirect_uri=http://cb",
+            "/api/v1/connections/unknown/callback?code=auth_code&redirect_uri=http://cb",
             headers=user_headers,
         )
         assert resp.status_code == 400
 
     def test_complete_google_fit(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
         # find_by_user_id returns empty (first connection)
@@ -104,12 +110,12 @@ class TestDisconnect:
         assert resp.status_code == 401
 
     def test_unsupported_provider(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
-        resp = client.delete(
-            "/api/v1/connections/unknown", headers=user_headers
-        )
+        resp = client.delete("/api/v1/connections/unknown", headers=user_headers)
         assert resp.status_code == 400
 
 
@@ -119,10 +125,10 @@ class TestForceSync:
         assert resp.status_code == 401
 
     def test_unsupported_provider(
-        self, client: TestClient, mock_cursor: MockCursor,
+        self,
+        client: TestClient,
+        mock_cursor: MockCursor,
         user_headers: dict[str, str],
     ) -> None:
-        resp = client.post(
-            "/api/v1/connections/unknown/sync", headers=user_headers
-        )
+        resp = client.post("/api/v1/connections/unknown/sync", headers=user_headers)
         assert resp.status_code == 400

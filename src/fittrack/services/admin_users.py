@@ -64,13 +64,9 @@ class AdminUserService:
     ) -> dict[str, Any]:
         """Search users by various criteria with pagination."""
         if status and status not in USER_STATUSES:
-            raise AdminUserError(
-                f"Invalid status: {status}. Valid: {USER_STATUSES}", 400
-            )
+            raise AdminUserError(f"Invalid status: {status}. Valid: {USER_STATUSES}", 400)
         if role and role not in USER_ROLES:
-            raise AdminUserError(
-                f"Invalid role: {role}. Valid: {USER_ROLES}", 400
-            )
+            raise AdminUserError(f"Invalid role: {role}. Valid: {USER_ROLES}", 400)
 
         filters: dict[str, Any] = {}
         if email:
@@ -144,9 +140,7 @@ class AdminUserService:
     ) -> dict[str, Any]:
         """Change a user's status (suspend/ban/activate)."""
         if new_status not in USER_STATUSES:
-            raise AdminUserError(
-                f"Invalid status: {new_status}. Valid: {USER_STATUSES}", 400
-            )
+            raise AdminUserError(f"Invalid status: {new_status}. Valid: {USER_STATUSES}", 400)
 
         user = self.user_repo.find_by_id(user_id)
         if not user:
@@ -156,15 +150,12 @@ class AdminUserService:
         allowed = ADMIN_STATUS_TRANSITIONS.get(current_status, [])
         if new_status not in allowed:
             raise AdminUserError(
-                f"Cannot transition from '{current_status}' to "
-                f"'{new_status}'. Allowed: {allowed}",
+                f"Cannot transition from '{current_status}' to '{new_status}'. Allowed: {allowed}",
                 409,
             )
 
         now = datetime.now(tz=UTC).isoformat()
-        self.user_repo.update(
-            user_id, data={"status": new_status, "updated_at": now}
-        )
+        self.user_repo.update(user_id, data={"status": new_status, "updated_at": now})
 
         # Log the action
         self._log_action(
@@ -196,21 +187,15 @@ class AdminUserService:
             "changed_at": now,
         }
 
-    def suspend_user(
-        self, user_id: str, admin_id: str, reason: str = ""
-    ) -> dict[str, Any]:
+    def suspend_user(self, user_id: str, admin_id: str, reason: str = "") -> dict[str, Any]:
         """Suspend a user."""
         return self.change_user_status(user_id, "suspended", admin_id, reason)
 
-    def ban_user(
-        self, user_id: str, admin_id: str, reason: str = ""
-    ) -> dict[str, Any]:
+    def ban_user(self, user_id: str, admin_id: str, reason: str = "") -> dict[str, Any]:
         """Ban a user."""
         return self.change_user_status(user_id, "banned", admin_id, reason)
 
-    def activate_user(
-        self, user_id: str, admin_id: str, reason: str = ""
-    ) -> dict[str, Any]:
+    def activate_user(self, user_id: str, admin_id: str, reason: str = "") -> dict[str, Any]:
         """Activate a user."""
         return self.change_user_status(user_id, "active", admin_id, reason)
 
@@ -254,9 +239,7 @@ class AdminUserService:
         self.transaction_repo.create(data=txn_data, new_id=txn_id)
 
         # Update user balance
-        self.user_repo.update(
-            user_id, data={"point_balance": new_balance, "updated_at": now}
-        )
+        self.user_repo.update(user_id, data={"point_balance": new_balance, "updated_at": now})
 
         # Log the action
         self._log_action(
@@ -336,9 +319,7 @@ class AdminUserService:
             offset=offset,
             filters=filters if filters else None,
         )
-        total = self.action_log_repo.count(
-            filters=filters if filters else None
-        )
+        total = self.action_log_repo.count(filters=filters if filters else None)
         total_pages = max(1, (total + limit - 1) // limit)
         return {
             "items": items,
@@ -362,9 +343,8 @@ class AdminUserService:
             user["profile"] = profiles[0]
 
         # Get recent transactions
-        txns = self.transaction_repo.find_all(
-            limit=10, offset=0, filters={"user_id": user_id}
-        )
+        txns = self.transaction_repo.find_all(limit=10, offset=0, filters={"user_id": user_id})
         user["recent_transactions"] = txns
 
-        return user
+        result: dict[str, Any] = user
+        return result

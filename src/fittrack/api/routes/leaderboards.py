@@ -5,16 +5,19 @@ Endpoints for viewing tier-scoped leaderboards and user rankings.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from fittrack.api.deps import get_current_user_id
 
+if TYPE_CHECKING:
+    from fittrack.services.leaderboard import LeaderboardService
+
 router = APIRouter(prefix="/api/v1/leaderboards", tags=["leaderboards"])
 
 
-def _get_leaderboard_service():  # type: ignore[no-untyped-def]
+def _get_leaderboard_service() -> LeaderboardService:
     from fittrack.core.database import get_pool
     from fittrack.repositories.activity_repository import ActivityRepository
     from fittrack.repositories.profile_repository import ProfileRepository

@@ -173,7 +173,8 @@ class TestProfileGateMiddleware:
         assert resp.status_code == 200
 
     def test_profile_path_always_allowed(
-        self, gated_client: TestClient,
+        self,
+        gated_client: TestClient,
     ) -> None:
         resp = gated_client.put(
             "/api/v1/users/me/profile",
@@ -184,17 +185,20 @@ class TestProfileGateMiddleware:
     # ── GET requests pass through ────────────────────────────────
 
     def test_get_activities_allowed_without_profile(
-        self, gated_client: TestClient,
+        self,
+        gated_client: TestClient,
     ) -> None:
         resp = gated_client.get(
-            "/api/v1/activities", headers=self._auth_header(),
+            "/api/v1/activities",
+            headers=self._auth_header(),
         )
         assert resp.status_code == 200
 
     # ── Unauthenticated passes through (route handles auth) ─────
 
     def test_unauthenticated_post_passes_through(
-        self, gated_client: TestClient,
+        self,
+        gated_client: TestClient,
     ) -> None:
         resp = gated_client.post("/api/v1/activities")
         assert resp.status_code == 200
@@ -203,7 +207,9 @@ class TestProfileGateMiddleware:
 
     @patch("fittrack.core.database.get_pool", return_value=None)
     def test_admin_bypasses_gate(
-        self, _pool: Any, gated_client: TestClient,
+        self,
+        _pool: Any,
+        gated_client: TestClient,
     ) -> None:
         resp = gated_client.post(
             "/api/v1/activities",
@@ -214,7 +220,8 @@ class TestProfileGateMiddleware:
     # ── Incomplete profile blocks write requests ─────────────────
 
     def test_no_profile_blocks_post(
-        self, gated_client: TestClient,
+        self,
+        gated_client: TestClient,
     ) -> None:
         """POST to a feature endpoint is blocked for user with no profile."""
         mock_pool = MagicMock()
@@ -243,7 +250,8 @@ class TestProfileGateMiddleware:
         assert "action" in data
 
     def test_incomplete_profile_blocks_post(
-        self, gated_client: TestClient,
+        self,
+        gated_client: TestClient,
     ) -> None:
         """POST blocked when profile exists but is missing required fields."""
         mock_pool = MagicMock()
@@ -251,13 +259,26 @@ class TestProfileGateMiddleware:
         mock_cursor = MagicMock()
         # Return a row with columns but display_name is None
         mock_cursor.description = [
-            ("PROFILE_ID",), ("USER_ID",), ("DISPLAY_NAME",),
-            ("DATE_OF_BIRTH",), ("STATE_OF_RESIDENCE",),
-            ("BIOLOGICAL_SEX",), ("AGE_BRACKET",), ("FITNESS_LEVEL",),
+            ("PROFILE_ID",),
+            ("USER_ID",),
+            ("DISPLAY_NAME",),
+            ("DATE_OF_BIRTH",),
+            ("STATE_OF_RESIDENCE",),
+            ("BIOLOGICAL_SEX",),
+            ("AGE_BRACKET",),
+            ("FITNESS_LEVEL",),
         ]
         mock_cursor.fetchall.return_value = [
-            ("p1", "test-user", None,  # display_name is None
-             "1990-01-01", "CA", "male", "18-29", "beginner"),
+            (
+                "p1",
+                "test-user",
+                None,  # display_name is None
+                "1990-01-01",
+                "CA",
+                "male",
+                "18-29",
+                "beginner",
+            ),
         ]
         mock_cursor.__enter__ = lambda s: s
         mock_cursor.__exit__ = MagicMock(return_value=False)
@@ -277,20 +298,25 @@ class TestProfileGateMiddleware:
         assert resp.status_code == 403
 
     def test_complete_profile_allows_post(
-        self, gated_client: TestClient,
+        self,
+        gated_client: TestClient,
     ) -> None:
         """POST allowed when user has a complete profile."""
         mock_pool = MagicMock()
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_cursor.description = [
-            ("PROFILE_ID",), ("USER_ID",), ("DISPLAY_NAME",),
-            ("DATE_OF_BIRTH",), ("STATE_OF_RESIDENCE",),
-            ("BIOLOGICAL_SEX",), ("AGE_BRACKET",), ("FITNESS_LEVEL",),
+            ("PROFILE_ID",),
+            ("USER_ID",),
+            ("DISPLAY_NAME",),
+            ("DATE_OF_BIRTH",),
+            ("STATE_OF_RESIDENCE",),
+            ("BIOLOGICAL_SEX",),
+            ("AGE_BRACKET",),
+            ("FITNESS_LEVEL",),
         ]
         mock_cursor.fetchall.return_value = [
-            ("p1", "test-user", "Jane Doe",
-             "1990-01-01", "CA", "female", "30-39", "intermediate"),
+            ("p1", "test-user", "Jane Doe", "1990-01-01", "CA", "female", "30-39", "intermediate"),
         ]
         mock_cursor.__enter__ = lambda s: s
         mock_cursor.__exit__ = MagicMock(return_value=False)
@@ -313,7 +339,9 @@ class TestProfileGateMiddleware:
 
     @patch("fittrack.core.database.get_pool", return_value=None)
     def test_no_pool_allows_through(
-        self, _pool: Any, gated_client: TestClient,
+        self,
+        _pool: Any,
+        gated_client: TestClient,
     ) -> None:
         resp = gated_client.post(
             "/api/v1/activities",
@@ -324,7 +352,8 @@ class TestProfileGateMiddleware:
     # ── DB error → allow through gracefully ─────────────────────
 
     def test_db_error_allows_through(
-        self, gated_client: TestClient,
+        self,
+        gated_client: TestClient,
     ) -> None:
         with patch(
             "fittrack.core.database.get_pool",
@@ -339,7 +368,8 @@ class TestProfileGateMiddleware:
     # ── Invalid/expired token passes through ────────────────────
 
     def test_invalid_token_passes_through(
-        self, gated_client: TestClient,
+        self,
+        gated_client: TestClient,
     ) -> None:
         resp = gated_client.post(
             "/api/v1/activities",

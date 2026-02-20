@@ -134,9 +134,7 @@ def list_tables(request: Request) -> dict[str, Any]:
     conn = get_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute(
-                "SELECT table_name FROM user_tables ORDER BY table_name"
-            )
+            cur.execute("SELECT table_name FROM user_tables ORDER BY table_name")
             tables = [row[0] for row in cur.fetchall()]
         return {"tables": tables, "count": len(tables)}
     finally:

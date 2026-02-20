@@ -38,6 +38,7 @@ def _now() -> datetime:
 
 # ── User Factory ────────────────────────────────────────────────────
 
+
 def build_user(**overrides: Any) -> dict[str, Any]:
     """Generate a synthetic user dict."""
     data: dict[str, Any] = {
@@ -62,6 +63,7 @@ def build_user_batch(count: int = 10, **overrides: Any) -> list[dict[str, Any]]:
 
 
 # ── Profile Factory ─────────────────────────────────────────────────
+
 
 def build_profile(user_id: str | None = None, **overrides: Any) -> dict[str, Any]:
     """Generate a synthetic profile dict."""
@@ -97,6 +99,7 @@ def build_profile(user_id: str | None = None, **overrides: Any) -> dict[str, Any
 
 # ── Activity Factory ────────────────────────────────────────────────
 
+
 def build_activity(user_id: str | None = None, **overrides: Any) -> dict[str, Any]:
     """Generate a synthetic activity dict."""
     start = _now() - timedelta(hours=random.randint(1, 48))
@@ -121,6 +124,7 @@ def build_activity(user_id: str | None = None, **overrides: Any) -> dict[str, An
 
 # ── Tracker Connection Factory ──────────────────────────────────────
 
+
 def build_connection(user_id: str | None = None, **overrides: Any) -> dict[str, Any]:
     """Generate a synthetic tracker connection dict."""
     data: dict[str, Any] = {
@@ -142,6 +146,7 @@ def build_connection(user_id: str | None = None, **overrides: Any) -> dict[str, 
 
 # ── Point Transaction Factory ───────────────────────────────────────
 
+
 def build_transaction(user_id: str | None = None, **overrides: Any) -> dict[str, Any]:
     """Generate a synthetic point transaction dict."""
     amount = random.randint(10, 500)
@@ -161,6 +166,7 @@ def build_transaction(user_id: str | None = None, **overrides: Any) -> dict[str,
 
 
 # ── Drawing Factory ─────────────────────────────────────────────────
+
 
 def build_drawing(**overrides: Any) -> dict[str, Any]:
     """Generate a synthetic drawing dict."""
@@ -185,6 +191,7 @@ def build_drawing(**overrides: Any) -> dict[str, Any]:
 
 # ── Ticket Factory ──────────────────────────────────────────────────
 
+
 def build_ticket(
     drawing_id: str | None = None,
     user_id: str | None = None,
@@ -204,6 +211,7 @@ def build_ticket(
 
 
 # ── Prize Factory ───────────────────────────────────────────────────
+
 
 def build_prize(drawing_id: str | None = None, **overrides: Any) -> dict[str, Any]:
     """Generate a synthetic prize dict."""
@@ -225,6 +233,7 @@ def build_prize(drawing_id: str | None = None, **overrides: Any) -> dict[str, An
 
 # ── Sponsor Factory ─────────────────────────────────────────────────
 
+
 def build_sponsor(**overrides: Any) -> dict[str, Any]:
     """Generate a synthetic sponsor dict."""
     data: dict[str, Any] = {
@@ -245,6 +254,7 @@ def build_sponsor(**overrides: Any) -> dict[str, Any]:
 
 
 # ── Fulfillment Factory ────────────────────────────────────────────
+
 
 def build_fulfillment(
     ticket_id: str | None = None,

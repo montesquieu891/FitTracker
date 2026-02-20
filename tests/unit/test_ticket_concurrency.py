@@ -257,8 +257,6 @@ class TestConcurrencyEdgeCases:
             user_repo=MockUserRepo(users),
         )
 
-        result = svc.purchase_tickets(
-            user_id="u1", drawing_id="d1", quantity=100, now=NOW
-        )
+        result = svc.purchase_tickets(user_id="u1", drawing_id="d1", quantity=100, now=NOW)
         assert result["quantity"] == 100
         assert len(result["tickets"]) == 100

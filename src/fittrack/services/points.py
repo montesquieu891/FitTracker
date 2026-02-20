@@ -147,6 +147,7 @@ def calculate_activity_points(
     metrics = activity.get("metrics", {})
     if isinstance(metrics, str):
         import json
+
         try:
             metrics = json.loads(metrics)
         except (json.JSONDecodeError, TypeError):
@@ -354,11 +355,7 @@ class PointsService:
     def get_points_earned(self, user_id: str) -> int:
         """Get total points ever earned (for leaderboard ranking)."""
         transactions = self.transaction_repo.find_by_user_id(user_id)
-        return sum(
-            t.get("amount", 0)
-            for t in transactions
-            if t.get("transaction_type") == "earn"
-        )
+        return sum(t.get("amount", 0) for t in transactions if t.get("transaction_type") == "earn")
 
     def get_transaction_history(
         self,
@@ -367,20 +364,19 @@ class PointsService:
         offset: int = 0,
     ) -> list[dict[str, Any]]:
         """Get paginated transaction history for a user."""
-        return self.transaction_repo.find_all(
+        result: list[dict[str, Any]] = self.transaction_repo.find_all(
             limit=limit,
             offset=offset,
             filters={"user_id": user_id},
         )
+        return result
 
     def get_daily_context(self, user_id: str) -> dict[str, Any]:
         """Build a context dict with today's point/activity state.
 
         Used for daily cap enforcement and workout bonus limits.
         """
-        today_start = datetime.now(tz=UTC).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
+        today_start = datetime.now(tz=UTC).replace(hour=0, minute=0, second=0, microsecond=0)
         today_end = today_start + timedelta(days=1)
 
         # Get today's transactions
@@ -424,6 +420,7 @@ class PointsService:
                 metrics = a.get("metrics", {})
                 if isinstance(metrics, str):
                     import json
+
                     try:
                         metrics = json.loads(metrics)
                     except (json.JSONDecodeError, TypeError):
@@ -524,12 +521,8 @@ class PointsService:
                     "log_date": today,
                     "total_points": points,
                     "step_points": points if activity.get("activity_type") == "steps" else 0,
-                    "workout_points": (
-                        points if activity.get("activity_type") == "workout" else 0
-                    ),
-                    "workout_count": (
-                        1 if activity.get("activity_type") == "workout" else 0
-                    ),
+                    "workout_points": (points if activity.get("activity_type") == "workout" else 0),
+                    "workout_count": (1 if activity.get("activity_type") == "workout" else 0),
                     "active_minute_points": (
                         points if activity.get("activity_type") == "active_minutes" else 0
                     ),
