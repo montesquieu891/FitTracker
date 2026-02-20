@@ -41,6 +41,8 @@ services:
       - ORACLE_DSN=fittrack-oracle:1521/FREEPDB1
       - REDIS_URL=redis://fittrack-redis:6379/0
     depends_on:
+      oracle:
+        condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped

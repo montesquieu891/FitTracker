@@ -6,6 +6,7 @@ import time
 from typing import Any
 
 from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
@@ -73,7 +74,10 @@ def readiness_probe(request: Request) -> dict[str, Any]:
         if settings and settings.is_production:
             overall_ready = False
 
-    return {
+    body = {
         "status": "ready" if overall_ready else "not_ready",
         "checks": checks,
     }
+    if not overall_ready:
+        return JSONResponse(content=body, status_code=503)
+    return body

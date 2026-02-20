@@ -45,7 +45,7 @@ def _connect() -> oracledb.Connection:
     """Connect to Oracle using environment variables."""
     dsn = os.getenv("ORACLE_DSN", "localhost:1521/FREEPDB1")
     user = os.getenv("ORACLE_USER", "fittrack")
-    password = os.getenv("ORACLE_PASSWORD", "fittrack_dev")
+    password = os.getenv("ORACLE_PASSWORD", "FitTrack_Dev_2026!")
     return oracledb.connect(user=user, password=password, dsn=dsn)
 
 
