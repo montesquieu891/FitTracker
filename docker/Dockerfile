@@ -17,7 +17,6 @@ RUN pip install --no-cache-dir . faker
 # Copy application files
 COPY scripts/ scripts/
 COPY static/ static/
-COPY keys/ keys/
 COPY tests/factories/ tests/factories/
 COPY tests/__init__.py tests/__init__.py
 
