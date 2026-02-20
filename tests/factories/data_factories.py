@@ -104,6 +104,7 @@ def build_activity(user_id: str | None = None, **overrides: Any) -> dict[str, An
     data: dict[str, Any] = {
         "activity_id": _uuid(),
         "user_id": user_id or _uuid(),
+        "external_id": _uuid(),
         "activity_type": random.choice(ACTIVITY_TYPES),
         "start_time": start,
         "end_time": start + timedelta(minutes=duration),
@@ -131,7 +132,7 @@ def build_connection(user_id: str | None = None, **overrides: Any) -> dict[str, 
         "refresh_token": fake.sha256(),
         "token_expires_at": _now() + timedelta(hours=1),
         "last_sync_at": _now() - timedelta(minutes=random.randint(5, 60)),
-        "sync_status": "synced",
+        "sync_status": "success",
         "created_at": _now(),
         "updated_at": _now(),
     }

@@ -5,10 +5,17 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 
 router = APIRouter(prefix="/api/v1/dev", tags=["dev"])
 logger = logging.getLogger(__name__)
+
+
+def _block_in_production(request: Request) -> None:
+    """Raise 404 if running in production."""
+    settings = getattr(request.app.state, "settings", None)
+    if settings and getattr(settings, "app_env", "development") == "production":
+        raise HTTPException(status_code=404, detail="Not found")
 
 
 def _get_pool(request: Request) -> Any:
@@ -18,6 +25,7 @@ def _get_pool(request: Request) -> Any:
 
 @router.post("/seed", status_code=201)
 def seed_database(request: Request) -> dict[str, Any]:
+    _block_in_production(request)
     """Seed the database with synthetic data."""
     pool = _get_pool(request)
     if pool is None:
@@ -44,6 +52,7 @@ def seed_database(request: Request) -> dict[str, Any]:
 @router.post("/reset")
 def reset_database(request: Request) -> dict[str, Any]:
     """Reset the database — drop and recreate all tables."""
+    _block_in_production(request)
     pool = _get_pool(request)
     if pool is None:
         logger.info("Dev reset endpoint called (no DB pool — mock response)")
@@ -73,6 +82,7 @@ def reset_database(request: Request) -> dict[str, Any]:
 @router.post("/migrate")
 def run_migrate(request: Request) -> dict[str, Any]:
     """Run pending database migrations."""
+    _block_in_production(request)
     pool = _get_pool(request)
     if pool is None:
         # Try to init the pool now
@@ -114,6 +124,7 @@ def run_migrate(request: Request) -> dict[str, Any]:
 @router.get("/tables")
 def list_tables(request: Request) -> dict[str, Any]:
     """List all tables in the current schema."""
+    _block_in_production(request)
     pool = _get_pool(request)
     if pool is None:
         return {"tables": [], "message": "No database connection"}

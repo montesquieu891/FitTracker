@@ -71,12 +71,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # Register routers
     _register_routes(application)
 
-    # Mount static files (test page)
-    static_dir = Path(__file__).resolve().parent.parent.parent / "static"
-    if static_dir.is_dir():
-        application.mount(
-            "/static", StaticFiles(directory=str(static_dir), html=True), name="static"
-        )
+    # Mount static files (test page) — dev/testing only
+    if settings.app_env != "production":
+        static_dir = Path(__file__).resolve().parent.parent.parent / "static"
+        if static_dir.is_dir():
+            application.mount(
+                "/static", StaticFiles(directory=str(static_dir), html=True), name="static"
+            )
 
     return application
 

@@ -9,30 +9,44 @@
 - Python 3.12+
 - Docker & Docker Compose (for Oracle 23ai Free + Redis)
 
-### Setup
+### Setup (host-run API, recommended)
 
 ```bash
 # Clone and install
 git clone <repo-url> && cd FitTracker
 pip install -e ".[dev]"
 
-# Start infrastructure (Oracle 23ai Free + Redis)
-make docker-up
+# Start infrastructure (Oracle 23ai Free + Redis) via Compose
+make docker-up        # oracle + redis only
 
-# Run database migrations
+# Run database migrations (host → Oracle container)
 make db-migrate
 
 # Seed with test data
 make db-seed
 
-# Start the API server
+# Start the API server on host (uvicorn reload)
 make dev
+
+# Quick smoke
+make smoke            # uses scripts/smoke_http.sh (BASE_URL=http://localhost:8000)
 ```
+
+### Alternate: API in Docker (compose)
+
+```bash
+make docker-up-all    # oracle + redis + api container
+# API will be on http://localhost:8000
+```
+
+Environment defaults:
+- Host-run: `.env` uses `ORACLE_DSN=localhost:1521/FREEPDB1` and `REDIS_URL=redis://localhost:6379/0`
+- Compose API: overrides to `ORACLE_DSN=fittrack-oracle:1521/FREEPDB1` and `REDIS_URL=redis://fittrack-redis:6379/0`
 
 ### Development
 
 ```bash
-make test          # Run full test suite (1,174 tests)
+make test          # Run full test suite (1,270 tests)
 make test-unit     # Unit tests only
 make test-cov      # Tests with coverage report
 make lint          # Ruff lint + mypy type check
@@ -59,7 +73,7 @@ src/fittrack/
 └── main.py           # App factory
 
 tests/
-├── unit/             # 1,174 tests with mocked DB
+├── unit/             # 1,261 tests with mocked DB
 ├── integration/      # Tests against real Oracle container
 ├── factories/        # Synthetic data generators (Faker)
 └── conftest.py       # Shared fixtures
@@ -83,8 +97,8 @@ docker/               # Docker Compose + Dockerfiles (dev + prod)
 | Database   | Oracle 23ai Free (dev) / Autonomous JSON DB (prod) |
 | DB Driver  | python-oracledb (thin mode)     |
 | Cache      | Redis 7 / OCI Cache (prod)     |
-| Auth       | JWT RS256 + OAuth 2.0          |
-| Testing    | pytest + Hypothesis (1,174 tests) |
+| Auth       | JWT HS256 (dev/staging) + OAuth 2.0          |
+| Testing    | pytest + Hypothesis (1,270 tests) |
 | Linting    | ruff + mypy              |
 | CI/CD      | GitHub Actions           |
 | IaC        | Terraform (OCI)          |
@@ -121,7 +135,7 @@ Full interactive docs available at `/docs` (Swagger UI) when running.
 
 ## Testing
 
-1,174 tests covering all layers — services, repositories, routes, schemas, and end-to-end:
+1,270 tests covering all layers — services, repositories, routes, schemas, and end-to-end:
 
 ```bash
 make test          # Run full test suite
